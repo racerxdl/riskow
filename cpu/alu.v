@@ -2,7 +2,7 @@ module ALU (
   input         [3:0]   operation,
   input         [31:0]  X,
   input         [31:0]  Y,
-  output        [31:0]  O,
+  output        [31:0]  O
 );
 
 // ALU Operations
@@ -18,23 +18,29 @@ parameter ShiftRightSigned = 4'h8;
 parameter ShiftLeftUnsigned = 4'h9;
 parameter ShiftLeftSigned = 4'hA;
 
+reg [31:0] result;
+
+integer i;
+
 always @(*)
 begin
   case (operation)
-    ADD:                O = X +  Y;
-    SUB:                O = X -  Y;
-    OR:                 O = X |  Y;
-    XOR:                O = X ^  Y;
-    AND:                O = X &  Y;
-    LesserThanUnsigned: O = X <  Y;
-    LesserThanSigned:   O = $signed(X) < $signed(Y);
-    ShiftRightUnsigned: O = X >> Y;
-    ShiftRightSigned:   O = $signed(X) >>> Y;
-    ShiftLeftUnsigned:  O = X << Y;
-    ShiftLeftSigned:    O = $signed(X) <<< Y;
-    default:            O = 0;
+    ADD:                result = X +  Y;
+    SUB:                result = X -  Y;
+    OR:                 result = X |  Y;
+    XOR:                result = X ^  Y;
+    AND:                result = X &  Y;
+    LesserThanUnsigned: result = X <  Y;
+    LesserThanSigned:   result = $signed(X) < $signed(Y);
+    ShiftRightUnsigned: X >> (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X >> i;            // OMG THATS HORRIBLE
+    ShiftRightSigned:   $signed(X) >>> (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) >>> i;  // OMG THATS HORRIBLE
+    ShiftLeftUnsigned:  X << (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X << i;            // OMG THATS HORRIBLE
+    ShiftLeftSigned:    $signed(X) <<< (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) <<< i;  // OMG THATS HORRIBLE
+    default:            result = 0;
   endcase
 end
+
+assign O = result;
 
 endmodule
 
