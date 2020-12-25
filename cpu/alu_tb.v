@@ -133,6 +133,27 @@ module ALUTest;
       if (O != $unsigned($signed(X) <<< (Y % 32))) $error("Expected O to be %d but got %d.", $signed(X) <<< (Y % 32), O);
     end
 
+    // Test operation GreaterThanOrEqualUnsigned
+    operation = dut.GreaterThanOrEqualUnsigned;
+    for (i = 0; i < numIterations; i++)
+    begin
+      X = $random;
+      Y = $random;
+      #10
+      if (O != (X >= Y)) $error("Expected O to be %d but got %d.", X >= Y, O);
+    end
+
+    // Test operation GreaterThanOrEqualUnsigned
+    operation = dut.GreaterThanOrEqualSigned;
+    for (i = 0; i < numIterations; i++)
+    begin
+      X = $random;
+      Y = $random;
+      #10
+      if (O != ($signed(X) >= $signed(Y))) $error("Expected O to be %d but got %d.", $signed(X) >= $signed(Y), O);
+    end
+
+
     #100
 
     $finish;

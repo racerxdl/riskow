@@ -17,6 +17,8 @@ parameter ShiftRightUnsigned = 4'h7;
 parameter ShiftRightSigned = 4'h8;
 parameter ShiftLeftUnsigned = 4'h9;
 parameter ShiftLeftSigned = 4'hA;
+parameter GreaterThanOrEqualUnsigned = 4'hB;
+parameter GreaterThanOrEqualSigned = 4'hC;
 
 reg [31:0] result;
 
@@ -25,18 +27,20 @@ integer i;
 always @(*)
 begin
   case (operation)
-    ADD:                result = X +  Y;
-    SUB:                result = X -  Y;
-    OR:                 result = X |  Y;
-    XOR:                result = X ^  Y;
-    AND:                result = X &  Y;
-    LesserThanUnsigned: result = X <  Y;
-    LesserThanSigned:   result = $signed(X) < $signed(Y);
-    ShiftRightUnsigned: X >> (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X >> i;            // OMG THATS HORRIBLE
-    ShiftRightSigned:   $signed(X) >>> (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) >>> i;  // OMG THATS HORRIBLE
-    ShiftLeftUnsigned:  X << (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X << i;            // OMG THATS HORRIBLE
-    ShiftLeftSigned:    $signed(X) <<< (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) <<< i;  // OMG THATS HORRIBLE
-    default:            result = 0;
+    ADD:                        result = X +  Y;
+    SUB:                        result = X -  Y;
+    OR:                         result = X |  Y;
+    XOR:                        result = X ^  Y;
+    AND:                        result = X &  Y;
+    LesserThanUnsigned:         result = X <  Y;
+    LesserThanSigned:           result = $signed(X) < $signed(Y);
+    ShiftRightUnsigned:         X >> (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X >> i;            // OMG THATS HORRIBLE
+    ShiftRightSigned:           $signed(X) >>> (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) >>> i;  // OMG THATS HORRIBLE
+    ShiftLeftUnsigned:          X << (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X << i;            // OMG THATS HORRIBLE
+    ShiftLeftSigned:            $signed(X) <<< (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) <<< i;  // OMG THATS HORRIBLE
+    GreaterThanOrEqualUnsigned: result = X >=  Y;
+    GreaterThanSigned:          result = $signed(X) >= $signed(Y);
+    default:                    result = 0;
   endcase
 end
 

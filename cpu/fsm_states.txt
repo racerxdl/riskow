@@ -1,0 +1,124 @@
+GLOBAL
+  1. Set Bus Address = PC, Set PC Count = 1
+  2. READ Bus Data -> Instruction Holder, Set PC Count = 0
+
+BRANCH/JUMP:
+
+imm[31:12]                          rd          0010111 U auipc   || x[rd] = pc + sext(immediate[31:12] << 12)
+  3. Set regNum = rd, Set ALU X = pcDataIn - 4, Set ALU Y = (IMM << 12) Set ALU OP = ADD
+  4. Set regIn = ALU O, Set regWriteEnable = 1
+  5. Set regWriteEnable = 0
+
+imm[31:12]                          rd          0110111 U lui     || x[rd] = sext(immediate[31:12] << 12)
+  3. Set regNum = rd
+  4. Set regIn = sign extend ( dataOut << 12 ), Set regWriteEnable = 1
+  5. Set regWriteEnable = 0
+
+imm[20|10:1|11|19:12]               rd          1101111 J jal     || x[rd] = pc+4; pc += sext(offset)
+  3.
+    3.1 Set regNum = rd,
+    3.2 Set regIn = pcDataIn,
+    3.3 Set regWriteEnable = 1,
+    3.4 Set ALU X = pcDataIn,
+    3.5 Set ALU Y = sign extend (offset)
+    3.6 Set ALU OP = ADD
+  4.
+    4.1 Set regWriteEnable = 0,
+    4.2 Set pcDataOut = ALU O,
+    4.3 Set pcWriteEnable = 1
+  5. Set pcWriteEnable = 0
+
+imm[11:0]                   rs1 000 rd          1100111 I jalr    || t =pc+4; pc=(x[rs1]+sext(offset))&∼1; x[rd]=t
+  3.
+    3.1 Set regNum = rs1,
+    3.4 Set ALU X = sign extend (offset)
+    3.6 Set ALU OP = ADD
+  4.
+    4.1 Set ALU Y = regOut
+    4.2 Set regNum = rd
+    4.3 Set regWriteEnable = 1
+    4.4 Set regIn = pcDataIn
+  5.
+    5.1 Set regWriteEnable = 0
+    5.2 Set pcDataOut = ALU O & ~1,
+    5.3 Set pcWriteEnable = 1
+  6. pcWriteEnable = 0
+
+
+imm[12|10:5]          rs2   rs1 000 imm[4:1|11] 1100011 B beq     || if (rs1 == rs2) pc += sext(offset)
+imm[12|10:5]          rs2   rs1 001 imm[4:1|11] 1100011 B bne     || if (rs1 != rs2) pc += sext(offset)
+imm[12|10:5]          rs2   rs1 100 imm[4:1|11] 1100011 B blt     || if (rs1 < rs2)  pc += sext(offset)   [  SIGNED  ]
+imm[12|10:5]          rs2   rs1 101 imm[4:1|11] 1100011 B bge     || if (rs1 ≥ rs2)  pc += sext(offset)   [  SIGNED  ]
+imm[12|10:5]          rs2   rs1 110 imm[4:1|11] 1100011 B bltu    || if (rs1 < rs2)  pc += sext(offset)   [ UNSIGNED ]
+imm[12|10:5]          rs2   rs1 111 imm[4:1|11] 1100011 B bgeu    || if (rs1 ≥ rs2)  pc += sext(offset)   [ UNSIGNED ]
+    3. Set regNum = rs1, Set ALU OP = CORRECT OPER
+    4. Read regOut store in ALU X, Set regNum = rs2
+    5. Read regOut store in ALU Y, Set regNum = rd
+    6. Read ALU O store in regIn, Set regWriteEnable = 1
+    7. Set regWriteEnable = 0
+
+LOAD/STORE:
+
+
+imm[11:0]                   rs1 000 rd          0000011 I lb      x[rd] = sext(M[x[rs1] + sext(offset)][7:0])
+imm[11:0]                   rs1 001 rd          0000011 I lh      x[rd] = sext(M[x[rs1] + sext(offset)][15:0])
+imm[11:0]                   rs1 010 rd          0000011 I lw      x[rd] = sext(M[x[rs1] + sext(offset)][31:0])
+  3. Set regNum = rs1
+  4. Set Bus Address = regOut + sign extend (imm), Set regNum = rd
+  5. Set regIn = sign extend ( dataOut & bytemask ), Set regWriteEnable = 1
+  6. Set regWriteEnable = 0
+
+
+imm[11:0]                   rs1 100 rd          0000011 I lbu     x[rd] = M[x[rs1] + sext(offset)][7:0]
+imm[11:0]                   rs1 101 rd          0000011 I lhu     x[rd] = M[x[rs1] + sext(offset)][15:0]
+  3. Set regNum = rs1
+  4. Set Bus Address = regOut + sign extend (imm), Set regNum = rd
+  5. Set regIn = dataOut & bytemask, Set regWriteEnable = 1
+  6. Set regWriteEnable = 0
+
+
+imm[11:5]             rs2   rs1 000 imm[4:0]    0100011 S sb      M[x[rs1] + sext(imm)] = x[rs2][7:0]
+imm[11:5]             rs2   rs1 001 imm[4:0]    0100011 S sh      M[x[rs1] + sext(imm)] = x[rs2][15:0]
+imm[11:5]             rs2   rs1 010 imm[4:0]    0100011 S sw      M[x[rs1] + sext(imm)] = x[rs2][31:0]
+  3. Set regNum = rs1
+  4. Set Bus Address = regOut + sign extend (imm), Set regNum = rs2
+  5. Set dataOut = regout & bytemask | dataIn & ~bytemask, busWriteEnable = 1
+  6. busWriteEnable = 0
+
+ALU:
+
+  imm[11:0]                   rs1 000 rd          0010011 I addi    x[rd] = x[rs1] + sext(immediate)
+  imm[11:0]                   rs1 010 rd          0010011 I slti    x[rd] = x[rs1] < sext(immediate)    [  SIGNED  ]
+  imm[11:0]                   rs1 011 rd          0010011 I sltiu   x[rd] = x[rs1] < sext(immediate)    [ UNSIGNED ]
+  imm[11:0]                   rs1 100 rd          0010011 I xori    x[rd] = x[rs1] ˆ sext(immediate)
+  imm[11:0]                   rs1 110 rd          0010011 I ori     x[rd] = x[rs1] | sext(immediate)
+  imm[11:0]                   rs1 111 rd          0010011 I andi    x[rd] = x[rs1] & sext(immediate)
+    3. Set regNum = rs1, Set ALU OP = CORRECT OPER, Set ALU Y = sign extend (IMM)
+    4. Read regOut store in ALU X, Set regNum = rd
+    5. Read ALU O store in regIn, Set regWriteEnable = 1
+    6. Set regWriteEnable = 0
+
+
+  0000000               shamt rs1 001 rd          0010011 I slli    x[rd] = x[rs1] << shamt
+  0000000               shamt rs1 101 rd          0010011 I srli    x[rd] = x[rs1] >> shamt
+  0100000               shamt rs1 101 rd          0010011 I srai    x[rd] = x[rs1] >> shamt             [  SIGNED  ]
+    3. Set regNum = rs1, Set ALU OP = CORRECT OPER, Set ALU Y = IMM
+    4. Read regOut store in ALU X, Set regNum = rd
+    5. Read ALU O store in regIn, Set regWriteEnable = 1
+    6. Set regWriteEnable = 0
+
+  0000000               rs2   rs1 000 rd          0110011 R add     x[rd] = x[rs1] + x[rs2]
+  0100000               rs2   rs1 000 rd          0110011 R sub     x[rd] = x[rs1] - x[rs2]
+  0000000               rs2   rs1 001 rd          0110011 R sll     x[rd] = x[rs1] << x[rs2]
+  0000000               rs2   rs1 010 rd          0110011 R slt     x[rd] = x[rs1] < x[rs2]             [  SIGNED  ]
+  0000000               rs2   rs1 011 rd          0110011 R sltu    x[rd] = x[rs1] < x[rs2]             [ UNSIGNED ]
+  0000000               rs2   rs1 100 rd          0110011 R xor     x[rd] = x[rs1] ^ x[rs2]
+  0000000               rs2   rs1 101 rd          0110011 R srl     x[rd] = x[rs1] >> x[rs2]            [ UNSIGNED ]
+  0100000               rs2   rs1 101 rd          0110011 R sra     x[rd] = x[rs1] >> x[rs2]            [  SIGNED  ]
+  0000000               rs2   rs1 110 rd          0110011 R or      x[rd] = x[rs1] | x[rs2]
+  0000000               rs2   rs1 111 rd          0110011 R and     x[rd] = x[rs1] & x[rs2]
+    3. Set regNum = rs1, Set ALU OP = CORRECT OPER
+    4. Read regOut store in ALU X, Set regNum = rs2
+    5. Read regOut store in ALU Y, Set regNum = rd
+    6. Read ALU O store in regIn, Set regWriteEnable = 1
+    7. Set regWriteEnable = 0

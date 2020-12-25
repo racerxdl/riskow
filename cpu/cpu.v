@@ -10,8 +10,8 @@ module CPU (
 );
 
 // Program Counter
-wire  [31:0]  pcOut;
-wire  [31:0]  pcDataIn;
+wire  [31:0]   pcOut;
+wire  [31:0]   pcDataIn;
 wire           pcWriteEnable;
 wire           pcCountEnable;
 ProgramCounter PC(clk, reset, pcDataIn, pcOut, pcWriteEnable, pcCountEnable);
