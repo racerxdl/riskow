@@ -4,4 +4,4 @@
 *.o
 *.elf
 *.hex
-
+testdata/*.bin

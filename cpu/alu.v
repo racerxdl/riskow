@@ -34,12 +34,12 @@ begin
     AND:                        result = X &  Y;
     LesserThanUnsigned:         result = X <  Y;
     LesserThanSigned:           result = $signed(X) < $signed(Y);
-    ShiftRightUnsigned:         X >> (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X >> i;            // OMG THATS HORRIBLE
-    ShiftRightSigned:           $signed(X) >>> (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) >>> i;  // OMG THATS HORRIBLE
-    ShiftLeftUnsigned:          X << (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X << i;            // OMG THATS HORRIBLE
-    ShiftLeftSigned:            $signed(X) <<< (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) <<< i;  // OMG THATS HORRIBLE
+    ShiftRightUnsigned:         result = X >> (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X >> i;            // OMG THATS HORRIBLE
+    ShiftRightSigned:           result = $signed(X) >>> (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) >>> i;  // OMG THATS HORRIBLE
+    ShiftLeftUnsigned:          result = X << (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X << i;            // OMG THATS HORRIBLE
+    ShiftLeftSigned:            result = $signed(X) <<< (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) <<< i;  // OMG THATS HORRIBLE
     GreaterThanOrEqualUnsigned: result = X >=  Y;
-    GreaterThanSigned:          result = $signed(X) >= $signed(Y);
+    GreaterThanOrEqualSigned:   result = $signed(X) >= $signed(Y);
     default:                    result = 0;
   endcase
 end

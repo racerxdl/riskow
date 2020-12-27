@@ -20,7 +20,7 @@ begin
         registers[i] <= 0;
       end
   end
-  else if (writeEnable) registers[regNum] <= dataIn;
+  else if (writeEnable && regNum != 0) registers[regNum] <= dataIn;
 end
 
 assign dataOut = registers[regNum];

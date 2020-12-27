@@ -18,12 +18,27 @@
      id="defs2">
     <marker
        style="overflow:visible;"
-       id="marker2452"
+       id="marker1054"
        refX="0.0"
        refY="0.0"
        orient="auto"
        inkscape:stockid="Arrow1Lend"
        inkscape:isstock="true">
+      <path
+         transform="scale(0.8) rotate(180) translate(12.5,0)"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         id="path1052" />
+    </marker>
+    <marker
+       style="overflow:visible;"
+       id="marker2452"
+       refX="0.0"
+       refY="0.0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend"
+       inkscape:isstock="true"
+       inkscape:collect="always">
       <path
          transform="scale(0.8) rotate(180) translate(12.5,0)"
          style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
@@ -314,7 +329,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -589,5 +604,11 @@
          x="11.480474"
          y="35.292824"
          style="font-size:3.52778px;stroke-width:0.264583">ADD,XOR,AND, etc...</tspan></text>
+    <circle
+       id="path1208"
+       style="fill:#000000;stroke:none;stroke-width:0.264583"
+       cx="48.389484"
+       cy="14.535636"
+       r="0.39687499" />
   </g>
 </svg>

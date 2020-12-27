@@ -1,4 +1,3 @@
-
 SOURCES       := $(shell find . -name '*.c')
 OBJECTS       := $(SOURCES:%.c=%.o)
 

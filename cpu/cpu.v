@@ -21,14 +21,14 @@ wire  [31:0]  regIn;
 wire  [31:0]  regOut;
 wire  [3:0]   regNum;
 wire          regWriteEnable;
-RegisterBank dut(clk, reset, regIn, regOut, regNum, regWriteEnable);
+RegisterBank registers(clk, reset, regIn, regOut, regNum, regWriteEnable);
 
 // ALU
 wire  [3:0]   aluOp;
 wire  [31:0]  aluX;
 wire  [31:0]  aluY;
 wire  [31:0]  aluO;
-ALU dut(aluOp, aluX, aluY, aluO);
+ALU alu(aluOp, aluX, aluY, aluO);
 
 // Instruction Decoder
 InstructionDecoder ins(
@@ -40,7 +40,7 @@ InstructionDecoder ins(
   dataIn,
   dataOut,
   address,
-  busWriteEnable
+  busWriteEnable,
 
   // PC Control
   pcOut,
