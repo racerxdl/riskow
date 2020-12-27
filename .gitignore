@@ -1,3 +1,7 @@
 *.dsn
 *.vcd
 *.dsn.result
+*.o
+*.elf
+*.hex
+
