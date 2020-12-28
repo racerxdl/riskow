@@ -5,7 +5,7 @@ GLOBAL
 BRANCH/JUMP:
 
 imm[31:12]                          rd          0010111 U auipc   || x[rd] = pc + sext(immediate[31:12] << 12)
-  3. Set regNum = rd, Set ALU X = pcDataIn - 4, Set ALU Y = (IMM << 12) Set ALU OP = ADD
+  3. Set regNum = rd, Set ALU X = pcDataOut - 4, Set ALU Y = (IMM << 12) Set ALU OP = ADD
   4. Set regIn = ALU O, Set regWriteEnable = 1
   5. Set regWriteEnable = 0
 
@@ -17,14 +17,14 @@ imm[31:12]                          rd          0110111 U lui     || x[rd] = sex
 imm[20|10:1|11|19:12]               rd          1101111 J jal     || x[rd] = pc+4; pc += sext(offset)
   3.
     3.1 Set regNum = rd,
-    3.2 Set regIn = pcDataIn,
+    3.2 Set regIn = pcDataOut,
     3.3 Set regWriteEnable = 1,
-    3.4 Set ALU X = pcDataIn,
+    3.4 Set ALU X = pcDataOut,
     3.5 Set ALU Y = sign extend (offset)
     3.6 Set ALU OP = ADD
   4.
     4.1 Set regWriteEnable = 0,
-    4.2 Set pcDataOut = ALU O,
+    4.2 Set pcDataIn = ALU O,
     4.3 Set pcWriteEnable = 1
   5. Set pcWriteEnable = 0
 

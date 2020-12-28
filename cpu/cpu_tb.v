@@ -281,13 +281,46 @@ module CPUTest;
     //   clk = 0;
     // end
 
+    // for (i = 0; i < memorySize; i++)
+    // begin
+    //   memory[i] = 32'b0;
+    // end
+
+    // // Test Jmps
+    // $readmemh("testdata/test_luiauipc.mem", memory);
+
+    // // Reset
+    // reset = 1;
+    // dataIn = 0;
+
+    // repeat(4)
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // reset = 0;
+
+    // while (address != 32'h24) // End of LUI / AUIPC
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // if (cpu.registers.registers[1] != 32'hFFFFF000) $error("Expected X%02d to be %08x but got %08x", 1, 32'hFFFFF000, cpu.registers.registers[1]);
+    // if (cpu.registers.registers[2] != 32'hFFFFF018) $error("Expected X%02d to be %08x but got %08x", 2, 32'hFFFFF018, cpu.registers.registers[2]);
+
     for (i = 0; i < memorySize; i++)
     begin
       memory[i] = 32'b0;
     end
 
     // Test Jmps
-    $readmemh("testdata/test_luiauipc.mem", memory);
+    $readmemh("testdata/test_jaljalr.mem", memory);
 
     // Reset
     reset = 1;
@@ -303,7 +336,7 @@ module CPUTest;
 
     reset = 0;
 
-    while (address != 32'h24) // End of LUI / AUIPC
+    while (address != 32'h1c) // End of JAL/JALR
     begin
       #10
       clk = 1;
@@ -311,8 +344,9 @@ module CPUTest;
       clk = 0;
     end
 
-    if (cpu.registers.registers[1] != 32'hFFFFF000) $error("Expected X%02d to be %08x but got %08x", 1, 32'hFFFFF000, cpu.registers.registers[1]);
-    if (cpu.registers.registers[2] != 32'hFFFFF018) $error("Expected X%02d to be %08x but got %08x", 2, 32'hFFFFF018, cpu.registers.registers[2]);
+    if (cpu.registers.registers[1] != 32'h18) $error("Expected X%02d to be %08x but got %08x", 1, 32'h18, cpu.registers.registers[1]);
+    if (cpu.registers.registers[2] != 32'h30) $error("Expected X%02d to be %08x but got %08x", 2, 32'h30, cpu.registers.registers[2]);
+
 
     #100
 

@@ -51,7 +51,7 @@ wire  [11:0] immTypeI    = dataIn[31:20];
 wire  [11:0] immTypeS    = {dataIn[31:25], dataIn[11:7]};
 wire  [12:0] immTypeB    = {dataIn[31], dataIn[7], dataIn[30:25], dataIn[11:8], 1'b0};
 wire  [19:0] immTypeU    = dataIn[31:12];
-wire  [19:0] immTypeJ    = {dataIn[31], dataIn[19:12], dataIn[20], dataIn[30:12], 1'b0};
+wire  [19:0] immTypeJ    = {dataIn[31], dataIn[19:12], dataIn[20], dataIn[30:21], 1'b0};
 
 // Instruction Arguments
 reg   [4:0]   rs1;
@@ -326,8 +326,86 @@ begin
             end
           endcase
         end
+        else if (opcode == 7'b1101111) // jal
+        begin
+          case (currentState)
+            Execute0:
+            begin
+              regNum          <= rd;          // 3.1 Set regNum = rd
+              regIn           <= pcDataOut;   // 3.2 Set regIn = pcDataOut
+              regWriteEnable  <= 1;           // 3.3 Set regWriteEnable = 1
+              aluX            <= pcDataOut-4; // 3.4 Set ALU X = pcDataOut
+              aluY            <= imm;         // 3.5 Set ALU Y = sign extend (offset)
+              aluOp           <= alu.ADD;     // 3.6 Set ALU OP = ADD
+              currentState    <= currentState + 1;
+            end
+            Execute1:
+            begin
+              regWriteEnable  <= 0;         // 4.1 Set regWriteEnable = 0,
+              pcDataIn        <= aluO;      // 4.2 Set pcDataIn = ALU O,
+              pcWriteEnable   <= 1;         // 4.3 Set pcWriteEnable = 1
+              currentState    <= currentState + 1;
+            end
+            Execute2: // 5. Set pcWriteEnable = 0
+            begin
+              pcWriteEnable   <= 0;
+              currentState    <= Fetch0;
+            end
+          endcase
+        end
+        else if (opcode == 7'b1100111) // jalr
+        begin
+          case (currentState)
+            Execute0:
+            begin
+              regNum          <= rs1;       // 3.1 Set regNum = rs1,
+              aluX            <= imm;       // 3.4 Set ALU X = sign extend (offset)
+              aluOp           <= alu.ADD;   // 3.6 Set ALU OP = ADD
+              currentState    <= currentState + 1;
+            end
+            Execute1:
+            begin
+              aluY            <= regOut;    // 4.1 Set ALU Y = regOut
+              regNum          <= rd;        // 4.2 Set regNum = rd
+              regWriteEnable  <= 1;         // 4.3 Set regWriteEnable = 1
+              regIn           <= pcDataOut; // 4.4 Set regIn = pcDataOut
+              currentState    <= currentState + 1;
+            end
+            Execute2:
+            begin
+              regWriteEnable  <= 0;         // 5.1 Set regWriteEnable = 0
+              pcDataIn        <= aluO & ~1; // 5.2 Set pcDataIn = ALU O & ~1,
+              pcWriteEnable   <= 1;         // 5.3 Set pcWriteEnable = 1
+              currentState    <= currentState + 1;
+            end
+            Execute3: // 6 Set pcWriteEnable = 0
+            begin
+              pcWriteEnable   <= 0;
+              currentState    <= Fetch0;
+            end
+          endcase
+        end
     end
   end
 end
+
+/*
+imm[11:0]                   rs1 000 rd          1100111 I jalr    || t =pc+4; pc=(x[rs1]+sext(offset))&∼1; x[rd]=t
+  3.
+    3.1 Set regNum = rs1,
+    3.4 Set ALU X = sign extend (offset)
+    3.6 Set ALU OP = ADD
+  4.
+    4.1 Set ALU Y = regOut
+    4.2 Set regNum = rd
+    4.3 Set regWriteEnable = 1
+    4.4 Set regIn = pcDataOut
+  5.
+    5.1 Set regWriteEnable = 0
+    5.2 Set pcDataIn = ALU O & ~1,
+    5.3 Set pcWriteEnable = 1
+  6. pcWriteEnable = 0
+
+ */
 
 endmodule
