@@ -206,14 +206,88 @@ module CPUTest;
     // if (cpu.registers.registers[14] != 32'hFF000001) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFF000001, cpu.registers.registers[14]);
     // if (cpu.registers.registers[15] != 32'h00000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'h00000000, cpu.registers.registers[15]);
 
-    // Test Jmps
+    // // Test Jmps
+    // for (i = 0; i < memorySize; i++)
+    // begin
+    //   memory[i] = 32'b0;
+    // end
+
+    // // Test Jmps
+    // $readmemh("testdata/test_jmps.mem", memory);
+
+    // // Reset
+    // reset = 1;
+    // dataIn = 0;
+
+    // repeat(4)
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // reset = 0;
+
+    // $info("Testing BEQ");
+    // while (address != 32'h34) // End of BEQ
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // $info("Testing BNE");
+    // while (address != 32'h4C) // End of BNE
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // $info("Testing BLT");
+    // while (address != 32'h7C) // End of BLT
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // $info("Testing BGE");
+    // while (address != 32'hB8) // End of BGE
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+    // $info("Testing BLTU");
+    // while (address != 32'hD0) // End of BLTU
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+    // $info("Testing BGEU");
+    // while (address != 32'hE4) // End of BGEU
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
     for (i = 0; i < memorySize; i++)
     begin
       memory[i] = 32'b0;
     end
 
     // Test Jmps
-    $readmemh("testdata/test_jmps.mem", memory);
+    $readmemh("testdata/test_luiauipc.mem", memory);
 
     // Reset
     reset = 1;
@@ -229,8 +303,7 @@ module CPUTest;
 
     reset = 0;
 
-    $info("Testing BEQ");
-    while (address != 32'h34) // End of BEQ
+    while (address != 32'h24) // End of LUI / AUIPC
     begin
       #10
       clk = 1;
@@ -238,48 +311,8 @@ module CPUTest;
       clk = 0;
     end
 
-    $info("Testing BNE");
-    while (address != 32'h4C) // End of BNE
-    begin
-      #10
-      clk = 1;
-      #10
-      clk = 0;
-    end
-
-    $info("Testing BLT");
-    while (address != 32'h7C) // End of BLT
-    begin
-      #10
-      clk = 1;
-      #10
-      clk = 0;
-    end
-
-    $info("Testing BGE");
-    while (address != 32'hB8) // End of BGE
-    begin
-      #10
-      clk = 1;
-      #10
-      clk = 0;
-    end
-    $info("Testing BLTU");
-    while (address != 32'hD0) // End of BLTU
-    begin
-      #10
-      clk = 1;
-      #10
-      clk = 0;
-    end
-    $info("Testing BGEU");
-    while (address != 32'hE4) // End of BGEU
-    begin
-      #10
-      clk = 1;
-      #10
-      clk = 0;
-    end
+    if (cpu.registers.registers[1] != 32'hFFFFF000) $error("Expected X%02d to be %08x but got %08x", 1, 32'hFFFFF000, cpu.registers.registers[1]);
+    if (cpu.registers.registers[2] != 32'hFFFFF018) $error("Expected X%02d to be %08x but got %08x", 2, 32'hFFFFF018, cpu.registers.registers[2]);
 
     #100
 

@@ -147,7 +147,7 @@ begin
       end
       else if (inputOpcode == 7'b0010111 || inputOpcode == 7'b0110111)  // Type U instructions
       begin
-          imm <= { immTypeU[19:0], 11'b0 };
+          imm <= { immTypeU[19:0], 12'b0 };
       end
       else if (inputOpcode == 7'b1101111)                          // Type J instructions
       begin
@@ -285,22 +285,49 @@ begin
             end
           endcase
         end
+        else if (opcode == 7'b0010111) // auipc
+        begin
+          case (currentState)
+            Execute0: // 3. Set regNum = rd, Set ALU X = pcDataOut - 4, Set ALU Y = (IMM << 12) Set ALU OP = ADD
+            begin
+              regNum          <= rd;
+              aluX            <= pcDataOut - 4;
+              aluY            <= imm;
+              aluOp           <= alu.ADD;
+              currentState    <= currentState + 1;
+            end
+            Execute1: // 4. Set regIn = ALU O, Set regWriteEnable = 1
+            begin
+              regIn           <= aluO;
+              regWriteEnable  <= 1;
+              currentState    <= currentState + 1;
+            end
+            Execute2: // 5. Set regWriteEnable = 0
+            begin
+              regWriteEnable  <= 0;
+              currentState    <= Fetch0;
+            end
+          endcase
+        end
+        else if (opcode == 7'b0110111) // lui
+        begin
+          case (currentState)
+            Execute0: // 3. Set regNum = rd, Set regIn = sign extend ( dataOut << 12 ), Set regWriteEnable = 1
+            begin
+              regIn           <= imm;
+              regNum          <= rd;
+              regWriteEnable  <= 1;
+              currentState    <= currentState + 1;
+            end
+            Execute1: // 4. Set regWriteEnable = 0
+            begin
+              regWriteEnable  <= 0;
+              currentState    <= Fetch0;
+            end
+          endcase
+        end
     end
   end
 end
-
-/*
-imm[12|10:5]          rs2   rs1 000 imm[4:1|11] 1100011 B beq     || if (rs1 == rs2) pc += sext(offset)
-imm[12|10:5]          rs2   rs1 001 imm[4:1|11] 1100011 B bne     || if (rs1 != rs2) pc += sext(offset)
-imm[12|10:5]          rs2   rs1 100 imm[4:1|11] 1100011 B blt     || if (rs1 < rs2)  pc += sext(offset)   [  SIGNED  ]
-imm[12|10:5]          rs2   rs1 101 imm[4:1|11] 1100011 B bge     || if (rs1 ≥ rs2)  pc += sext(offset)   [  SIGNED  ]
-imm[12|10:5]          rs2   rs1 110 imm[4:1|11] 1100011 B bltu    || if (rs1 < rs2)  pc += sext(offset)   [ UNSIGNED ]
-imm[12|10:5]          rs2   rs1 111 imm[4:1|11] 1100011 B bgeu    || if (rs1 ≥ rs2)  pc += sext(offset)   [ UNSIGNED ]
-    3. Set regNum = rs1, Set ALU OP = CORRECT OPER
-    4. Read regOut store in ALU X, Set regNum = rs2
-    5. Read regOut store in ALU Y
-    6. If ALU O[0], pcWriteEnable = 1, pcWriteAdd = 1, pcDataIn = offset
-    7. Set pcWriteEnable = 0, pcWriteAdd = 0
-*/
 
 endmodule
