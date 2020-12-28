@@ -11,6 +11,7 @@ module InstructionDecoder (
   // PC Control
   input   wire  [31:0]  pcDataOut,
   output  reg           pcWriteEnable,
+  output  reg           pcWriteAdd,
   output  reg           pcCountEnable,
   output  reg   [31:0]  pcDataIn,
 
@@ -94,6 +95,7 @@ begin
     pcCountEnable   <= 0;
     pcWriteEnable   <= 0;
     pcDataIn        <= 0;
+    pcWriteAdd      <= 0;
 
     // Register Bank
     regIn           <= 0;
@@ -236,9 +238,69 @@ begin
             end
           endcase
         end
+        else if (opcode == 7'b1100011) // beq, bne, blt, bge, bltu, bgeu
+        begin
+          case (currentState)
+            Execute0: // 3. Set regNum = rs1, Set ALU OP = CORRECT OPER
+            begin
+              regNum          <= rs1;
+              case (funct3)
+                0: aluOp      <= alu.Equal;
+                1: aluOp      <= alu.NotEqual;
+                4: aluOp      <= alu.LesserThanSigned;
+                5: aluOp      <= alu.GreaterThanOrEqualSigned;
+                6: aluOp      <= alu.LesserThanUnsigned;
+                7: aluOp      <= alu.GreaterThanOrEqualUnsigned;
+              endcase
+              currentState    <= currentState + 1;
+            end
+            Execute1: // 4. Read regOut store in ALU X, Set regNum = rs2
+            begin
+              aluX            <= regOut;
+              regNum          <= rs2;
+              currentState    <= currentState + 1;
+            end
+            Execute2: // 5. Read regOut store in ALU Y
+            begin
+              aluY            <= regOut;
+              currentState    <= currentState + 1;
+            end
+            Execute3: // 6. If ALU O[0], pcWriteEnable = 1, pcWriteAdd = 1, pcDataIn = offset
+            begin
+              if (aluO[0])
+              begin
+                pcWriteEnable <= 1;
+                pcWriteAdd    <= 1;
+                pcDataIn      <= imm;
+                currentState  <= currentState + 1;
+              end
+              else
+                currentState  <= Fetch0;
+            end
+            Execute4:
+            begin
+                pcWriteEnable <= 0;
+                pcWriteAdd    <= 0;
+                currentState  <= Fetch0;
+            end
+          endcase
+        end
     end
   end
 end
 
+/*
+imm[12|10:5]          rs2   rs1 000 imm[4:1|11] 1100011 B beq     || if (rs1 == rs2) pc += sext(offset)
+imm[12|10:5]          rs2   rs1 001 imm[4:1|11] 1100011 B bne     || if (rs1 != rs2) pc += sext(offset)
+imm[12|10:5]          rs2   rs1 100 imm[4:1|11] 1100011 B blt     || if (rs1 < rs2)  pc += sext(offset)   [  SIGNED  ]
+imm[12|10:5]          rs2   rs1 101 imm[4:1|11] 1100011 B bge     || if (rs1 ≥ rs2)  pc += sext(offset)   [  SIGNED  ]
+imm[12|10:5]          rs2   rs1 110 imm[4:1|11] 1100011 B bltu    || if (rs1 < rs2)  pc += sext(offset)   [ UNSIGNED ]
+imm[12|10:5]          rs2   rs1 111 imm[4:1|11] 1100011 B bgeu    || if (rs1 ≥ rs2)  pc += sext(offset)   [ UNSIGNED ]
+    3. Set regNum = rs1, Set ALU OP = CORRECT OPER
+    4. Read regOut store in ALU X, Set regNum = rs2
+    5. Read regOut store in ALU Y
+    6. If ALU O[0], pcWriteEnable = 1, pcWriteAdd = 1, pcDataIn = offset
+    7. Set pcWriteEnable = 0, pcWriteAdd = 0
+*/
 
 endmodule

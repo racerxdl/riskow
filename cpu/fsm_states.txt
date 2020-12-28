@@ -54,8 +54,8 @@ imm[12|10:5]          rs2   rs1 111 imm[4:1|11] 1100011 B bgeu    || if (rs1 ≥
     3. Set regNum = rs1, Set ALU OP = CORRECT OPER
     4. Read regOut store in ALU X, Set regNum = rs2
     5. Read regOut store in ALU Y, Set regNum = rd
-    6. Read ALU O store in regIn, Set regWriteEnable = 1
-    7. Set regWriteEnable = 0
+    6. If ALU O, pcWriteEnable = 1, pcWriteAdd = 1, pcDataIn = offset
+    7. Set pcWriteEnable = 0, pcWriteAdd = 0
 
 LOAD/STORE:
 

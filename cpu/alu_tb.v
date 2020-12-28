@@ -153,6 +153,26 @@ module ALUTest;
       if (O != ($signed(X) >= $signed(Y))) $error("Expected O to be %d but got %d.", $signed(X) >= $signed(Y), O);
     end
 
+    // Test operation Equal
+    operation = dut.Equal;
+    for (i = 0; i < numIterations; i++)
+    begin
+      X = $random;
+      Y = $random;
+      #10
+      if (O != (X == Y)) $error("Expected O to be %d but got %d.", (X == Y), O);
+    end
+
+    // Test operation NotEqual
+    operation = dut.NotEqual;
+    for (i = 0; i < numIterations; i++)
+    begin
+      X = $random;
+      Y = $random;
+      #10
+      if (O != (X != Y)) $error("Expected O to be %d but got %d.", (X != Y), O);
+    end
+
 
     #100
 

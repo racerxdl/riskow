@@ -30,13 +30,190 @@ module CPUTest;
   initial begin
     $dumpfile("cpu_test.vcd");
     $dumpvars(0, CPUTest);
+    // for (i = 0; i < memorySize; i++)
+    // begin
+    //   memory[i] = 32'b0;
+    // end
+
+    // // Test ALU
+    // $readmemh("testdata/test_alu.mem", memory);
+
+    // // Reset
+    // reset = 1;
+    // dataIn = 0;
+
+    // repeat(4)
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // reset = 0;
+
+    // while (address != 32'h3C) // End of ADDI
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // if (cpu.registers.registers[0]  != 32'h000) $error("Expected X%02d to be %08x but got %08x", 0,  32'h000, cpu.registers.registers[0] );
+    // if (cpu.registers.registers[1]  != 32'h3E8) $error("Expected X%02d to be %08x but got %08x", 1,  32'h3E8, cpu.registers.registers[1] );
+    // if (cpu.registers.registers[2]  != 32'hBB8) $error("Expected X%02d to be %08x but got %08x", 2,  32'hBB8, cpu.registers.registers[2] );
+    // if (cpu.registers.registers[3]  != 32'h7D0) $error("Expected X%02d to be %08x but got %08x", 3,  32'h7D0, cpu.registers.registers[3] );
+    // if (cpu.registers.registers[4]  != 32'h000) $error("Expected X%02d to be %08x but got %08x", 4,  32'h000, cpu.registers.registers[4] );
+    // if (cpu.registers.registers[5]  != 32'h3E8) $error("Expected X%02d to be %08x but got %08x", 5,  32'h3E8, cpu.registers.registers[5] );
+    // if (cpu.registers.registers[6]  != 32'hBB8) $error("Expected X%02d to be %08x but got %08x", 6,  32'hBB8, cpu.registers.registers[6] );
+    // if (cpu.registers.registers[7]  != 32'h7D0) $error("Expected X%02d to be %08x but got %08x", 7,  32'h7D0, cpu.registers.registers[7] );
+    // if (cpu.registers.registers[8]  != 32'h000) $error("Expected X%02d to be %08x but got %08x", 8,  32'h000, cpu.registers.registers[8] );
+    // if (cpu.registers.registers[9]  != 32'h3E8) $error("Expected X%02d to be %08x but got %08x", 9,  32'h3E8, cpu.registers.registers[9] );
+    // if (cpu.registers.registers[10] != 32'hBB8) $error("Expected X%02d to be %08x but got %08x", 10, 32'hBB8, cpu.registers.registers[10]);
+    // if (cpu.registers.registers[11] != 32'h7D0) $error("Expected X%02d to be %08x but got %08x", 11, 32'h7D0, cpu.registers.registers[11]);
+    // if (cpu.registers.registers[12] != 32'h000) $error("Expected X%02d to be %08x but got %08x", 12, 32'h000, cpu.registers.registers[12]);
+    // if (cpu.registers.registers[13] != 32'h3E8) $error("Expected X%02d to be %08x but got %08x", 13, 32'h3E8, cpu.registers.registers[13]);
+    // if (cpu.registers.registers[14] != 32'hBB8) $error("Expected X%02d to be %08x but got %08x", 14, 32'hBB8, cpu.registers.registers[14]);
+    // if (cpu.registers.registers[15] != 32'h7D0) $error("Expected X%02d to be %08x but got %08x", 15, 32'h7D0, cpu.registers.registers[15]);
+
+    // while (address != 32'h58) // End of slti / sltiu
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // if (cpu.registers.registers[10] != 32'h0) $error("Expected X%02d to be %08x but got %08x", 10, 32'h0, cpu.registers.registers[10]);
+    // if (cpu.registers.registers[11] != 32'h1) $error("Expected X%02d to be %08x but got %08x", 11, 32'h1, cpu.registers.registers[11]);
+    // if (cpu.registers.registers[12] != 32'h1) $error("Expected X%02d to be %08x but got %08x", 12, 32'h1, cpu.registers.registers[12]);
+    // if (cpu.registers.registers[13] != 32'h0) $error("Expected X%02d to be %08x but got %08x", 13, 32'h0, cpu.registers.registers[13]);
+    // if (cpu.registers.registers[14] != 32'h0) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0, cpu.registers.registers[14]);
+    // if (cpu.registers.registers[15] != 32'h1) $error("Expected X%02d to be %08x but got %08x", 15, 32'h1, cpu.registers.registers[15]);
+
+    // while (address != 32'h70) // End of xori
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // if (cpu.registers.registers[13] != 32'hFFFFFF0F) $error("Expected X%02d to be %08x but got %08x", 13, 32'hFFFFFF0F, cpu.registers.registers[13]);
+    // if (cpu.registers.registers[14] != 32'hFFFFF8F0) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFFFFF8F0, cpu.registers.registers[14]);
+    // if (cpu.registers.registers[15] != 32'hFFFFF800) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFFFFF800, cpu.registers.registers[15]);
+
+    // while (address != 32'h94) // End of ori
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // if (cpu.registers.registers[10] != 32'h000000F0) $error("Expected X%02d to be %08x but got %08x", 10, 32'h000000F0, cpu.registers.registers[10]);
+    // if (cpu.registers.registers[11] != 32'h0000070F) $error("Expected X%02d to be %08x but got %08x", 11, 32'h0000070F, cpu.registers.registers[11]);
+    // if (cpu.registers.registers[12] != 32'h000007FF) $error("Expected X%02d to be %08x but got %08x", 12, 32'h000007FF, cpu.registers.registers[12]);
+    // if (cpu.registers.registers[13] != 32'hFFFFFFFF) $error("Expected X%02d to be %08x but got %08x", 13, 32'hFFFFFFFF, cpu.registers.registers[13]);
+    // if (cpu.registers.registers[14] != 32'hFFFFFFFF) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFFFFFFFF, cpu.registers.registers[14]);
+    // if (cpu.registers.registers[15] != 32'hFFFFFFFF) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFFFFFFFF, cpu.registers.registers[15]);
+
+    // while (address != 32'hb8) // End of andi
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // if (cpu.registers.registers[10] != 32'h00000050) $error("Expected X%02d to be %08x but got %08x", 10, 32'h00000050, cpu.registers.registers[10]);
+    // if (cpu.registers.registers[11] != 32'h00000105) $error("Expected X%02d to be %08x but got %08x", 11, 32'h00000105, cpu.registers.registers[11]);
+    // if (cpu.registers.registers[12] != 32'h00000155) $error("Expected X%02d to be %08x but got %08x", 12, 32'h00000155, cpu.registers.registers[12]);
+    // if (cpu.registers.registers[13] != 32'h000000F0) $error("Expected X%02d to be %08x but got %08x", 13, 32'h000000F0, cpu.registers.registers[13]);
+    // if (cpu.registers.registers[14] != 32'h0000070F) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0000070F, cpu.registers.registers[14]);
+    // if (cpu.registers.registers[15] != 32'h000007FF) $error("Expected X%02d to be %08x but got %08x", 15, 32'h000007FF, cpu.registers.registers[15]);
+
+    // while (address != 32'hd8) // End of slli
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // if (cpu.registers.registers[9]  != 32'hFF000000) $error("Expected X%02d to be %08x but got %08x",  9, 32'h00000050, cpu.registers.registers[9] );
+    // if (cpu.registers.registers[10] != 32'h07FF0000) $error("Expected X%02d to be %08x but got %08x", 10, 32'h00000050, cpu.registers.registers[10]);
+    // if (cpu.registers.registers[11] != 32'h0007FF00) $error("Expected X%02d to be %08x but got %08x", 11, 32'h00000105, cpu.registers.registers[11]);
+    // if (cpu.registers.registers[12] != 32'h00003FF8) $error("Expected X%02d to be %08x but got %08x", 12, 32'h00000155, cpu.registers.registers[12]);
+    // if (cpu.registers.registers[13] != 32'h00001FFC) $error("Expected X%02d to be %08x but got %08x", 13, 32'h000000F0, cpu.registers.registers[13]);
+    // if (cpu.registers.registers[14] != 32'h00000FFE) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0000070F, cpu.registers.registers[14]);
+    // if (cpu.registers.registers[15] != 32'h000007FF) $error("Expected X%02d to be %08x but got %08x", 15, 32'h000007FF, cpu.registers.registers[15]);
+
+    // while (address != 32'hfc) // End of srli
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // if (cpu.registers.registers[9]  != 32'h000000FF) $error("Expected X%02d to be %08x but got %08x",  9, 32'h00000050, cpu.registers.registers[9] );
+    // if (cpu.registers.registers[10] != 32'h0000FF00) $error("Expected X%02d to be %08x but got %08x", 10, 32'h00000050, cpu.registers.registers[10]);
+    // if (cpu.registers.registers[11] != 32'h00FF0000) $error("Expected X%02d to be %08x but got %08x", 11, 32'h00000105, cpu.registers.registers[11]);
+    // if (cpu.registers.registers[12] != 32'h1FE00000) $error("Expected X%02d to be %08x but got %08x", 12, 32'h00000155, cpu.registers.registers[12]);
+    // if (cpu.registers.registers[13] != 32'h3FC00000) $error("Expected X%02d to be %08x but got %08x", 13, 32'h000000F0, cpu.registers.registers[13]);
+    // if (cpu.registers.registers[14] != 32'h7F800000) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0000070F, cpu.registers.registers[14]);
+    // if (cpu.registers.registers[15] != 32'hFF000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'h000007FF, cpu.registers.registers[15]);
+
+    // while (address != 32'h11c) // End of srai
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // if (cpu.registers.registers[9]  != 32'hFFFFFFFF) $error("Expected X%02d to be %08x but got %08x",  9, 32'hFFFFFFFF, cpu.registers.registers[9] );
+    // if (cpu.registers.registers[10] != 32'hFFFFFF00) $error("Expected X%02d to be %08x but got %08x", 10, 32'hFFFFFF00, cpu.registers.registers[10]);
+    // if (cpu.registers.registers[11] != 32'hFFFF0000) $error("Expected X%02d to be %08x but got %08x", 11, 32'hFFFF0000, cpu.registers.registers[11]);
+    // if (cpu.registers.registers[12] != 32'hFFE00000) $error("Expected X%02d to be %08x but got %08x", 12, 32'hFFE00000, cpu.registers.registers[12]);
+    // if (cpu.registers.registers[13] != 32'hFFC00000) $error("Expected X%02d to be %08x but got %08x", 13, 32'hFFC00000, cpu.registers.registers[13]);
+    // if (cpu.registers.registers[14] != 32'hFF800000) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFF800000, cpu.registers.registers[14]);
+    // if (cpu.registers.registers[15] != 32'hFF000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFF000000, cpu.registers.registers[15]);
+
+    // while (address != 32'h12c) // End of ADD
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // if (cpu.registers.registers[13] != 32'hFF000000) $error("Expected X%02d to be %08x but got %08x", 13, 32'hFF000000, cpu.registers.registers[13]);
+    // if (cpu.registers.registers[14] != 32'hFEFFFFFF) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFEFFFFFF, cpu.registers.registers[14]);
+    // if (cpu.registers.registers[15] != 32'hFE000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFE000000, cpu.registers.registers[15]);
+
+    // while (address != 32'h13c) // End of SUB
+    // begin
+    //   #10
+    //   clk = 1;
+    //   #10
+    //   clk = 0;
+    // end
+
+    // if (cpu.registers.registers[13] != 32'h01000000) $error("Expected X%02d to be %08x but got %08x", 13, 32'h01000000, cpu.registers.registers[13]);
+    // if (cpu.registers.registers[14] != 32'hFF000001) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFF000001, cpu.registers.registers[14]);
+    // if (cpu.registers.registers[15] != 32'h00000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'h00000000, cpu.registers.registers[15]);
+
+    // Test Jmps
     for (i = 0; i < memorySize; i++)
     begin
       memory[i] = 32'b0;
     end
 
-    // Test ALU
-    $readmemh("testdata/test_alu.mem", memory);
+    // Test Jmps
+    $readmemh("testdata/test_jmps.mem", memory);
 
     // Reset
     reset = 1;
@@ -52,7 +229,8 @@ module CPUTest;
 
     reset = 0;
 
-    while (address != 32'h3C) // End of ADDI
+    $info("Testing BEQ");
+    while (address != 32'h34) // End of BEQ
     begin
       #10
       clk = 1;
@@ -60,24 +238,8 @@ module CPUTest;
       clk = 0;
     end
 
-    if (cpu.registers.registers[0]  != 32'h000) $error("Expected X%02d to be %08x but got %08x", 0,  32'h000, cpu.registers.registers[0] );
-    if (cpu.registers.registers[1]  != 32'h3E8) $error("Expected X%02d to be %08x but got %08x", 1,  32'h3E8, cpu.registers.registers[1] );
-    if (cpu.registers.registers[2]  != 32'hBB8) $error("Expected X%02d to be %08x but got %08x", 2,  32'hBB8, cpu.registers.registers[2] );
-    if (cpu.registers.registers[3]  != 32'h7D0) $error("Expected X%02d to be %08x but got %08x", 3,  32'h7D0, cpu.registers.registers[3] );
-    if (cpu.registers.registers[4]  != 32'h000) $error("Expected X%02d to be %08x but got %08x", 4,  32'h000, cpu.registers.registers[4] );
-    if (cpu.registers.registers[5]  != 32'h3E8) $error("Expected X%02d to be %08x but got %08x", 5,  32'h3E8, cpu.registers.registers[5] );
-    if (cpu.registers.registers[6]  != 32'hBB8) $error("Expected X%02d to be %08x but got %08x", 6,  32'hBB8, cpu.registers.registers[6] );
-    if (cpu.registers.registers[7]  != 32'h7D0) $error("Expected X%02d to be %08x but got %08x", 7,  32'h7D0, cpu.registers.registers[7] );
-    if (cpu.registers.registers[8]  != 32'h000) $error("Expected X%02d to be %08x but got %08x", 8,  32'h000, cpu.registers.registers[8] );
-    if (cpu.registers.registers[9]  != 32'h3E8) $error("Expected X%02d to be %08x but got %08x", 9,  32'h3E8, cpu.registers.registers[9] );
-    if (cpu.registers.registers[10] != 32'hBB8) $error("Expected X%02d to be %08x but got %08x", 10, 32'hBB8, cpu.registers.registers[10]);
-    if (cpu.registers.registers[11] != 32'h7D0) $error("Expected X%02d to be %08x but got %08x", 11, 32'h7D0, cpu.registers.registers[11]);
-    if (cpu.registers.registers[12] != 32'h000) $error("Expected X%02d to be %08x but got %08x", 12, 32'h000, cpu.registers.registers[12]);
-    if (cpu.registers.registers[13] != 32'h3E8) $error("Expected X%02d to be %08x but got %08x", 13, 32'h3E8, cpu.registers.registers[13]);
-    if (cpu.registers.registers[14] != 32'hBB8) $error("Expected X%02d to be %08x but got %08x", 14, 32'hBB8, cpu.registers.registers[14]);
-    if (cpu.registers.registers[15] != 32'h7D0) $error("Expected X%02d to be %08x but got %08x", 15, 32'h7D0, cpu.registers.registers[15]);
-
-    while (address != 32'h58) // End of slti / sltiu
+    $info("Testing BNE");
+    while (address != 32'h4C) // End of BNE
     begin
       #10
       clk = 1;
@@ -85,14 +247,8 @@ module CPUTest;
       clk = 0;
     end
 
-    if (cpu.registers.registers[10] != 32'h0) $error("Expected X%02d to be %08x but got %08x", 10, 32'h0, cpu.registers.registers[10]);
-    if (cpu.registers.registers[11] != 32'h1) $error("Expected X%02d to be %08x but got %08x", 11, 32'h1, cpu.registers.registers[11]);
-    if (cpu.registers.registers[12] != 32'h1) $error("Expected X%02d to be %08x but got %08x", 12, 32'h1, cpu.registers.registers[12]);
-    if (cpu.registers.registers[13] != 32'h0) $error("Expected X%02d to be %08x but got %08x", 13, 32'h0, cpu.registers.registers[13]);
-    if (cpu.registers.registers[14] != 32'h0) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0, cpu.registers.registers[14]);
-    if (cpu.registers.registers[15] != 32'h1) $error("Expected X%02d to be %08x but got %08x", 15, 32'h1, cpu.registers.registers[15]);
-
-    while (address != 32'h70) // End of xori
+    $info("Testing BLT");
+    while (address != 32'h7C) // End of BLT
     begin
       #10
       clk = 1;
@@ -100,111 +256,30 @@ module CPUTest;
       clk = 0;
     end
 
-    if (cpu.registers.registers[13] != 32'hFFFFFF0F) $error("Expected X%02d to be %08x but got %08x", 13, 32'hFFFFFF0F, cpu.registers.registers[13]);
-    if (cpu.registers.registers[14] != 32'hFFFFF8F0) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFFFFF8F0, cpu.registers.registers[14]);
-    if (cpu.registers.registers[15] != 32'hFFFFF800) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFFFFF800, cpu.registers.registers[15]);
-
-    while (address != 32'h94) // End of ori
+    $info("Testing BGE");
+    while (address != 32'hB8) // End of BGE
     begin
       #10
       clk = 1;
       #10
       clk = 0;
     end
-
-    if (cpu.registers.registers[10] != 32'h000000F0) $error("Expected X%02d to be %08x but got %08x", 10, 32'h000000F0, cpu.registers.registers[10]);
-    if (cpu.registers.registers[11] != 32'h0000070F) $error("Expected X%02d to be %08x but got %08x", 11, 32'h0000070F, cpu.registers.registers[11]);
-    if (cpu.registers.registers[12] != 32'h000007FF) $error("Expected X%02d to be %08x but got %08x", 12, 32'h000007FF, cpu.registers.registers[12]);
-    if (cpu.registers.registers[13] != 32'hFFFFFFFF) $error("Expected X%02d to be %08x but got %08x", 13, 32'hFFFFFFFF, cpu.registers.registers[13]);
-    if (cpu.registers.registers[14] != 32'hFFFFFFFF) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFFFFFFFF, cpu.registers.registers[14]);
-    if (cpu.registers.registers[15] != 32'hFFFFFFFF) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFFFFFFFF, cpu.registers.registers[15]);
-
-    while (address != 32'hb8) // End of andi
+    $info("Testing BLTU");
+    while (address != 32'hD0) // End of BLTU
     begin
       #10
       clk = 1;
       #10
       clk = 0;
     end
-
-    if (cpu.registers.registers[10] != 32'h00000050) $error("Expected X%02d to be %08x but got %08x", 10, 32'h00000050, cpu.registers.registers[10]);
-    if (cpu.registers.registers[11] != 32'h00000105) $error("Expected X%02d to be %08x but got %08x", 11, 32'h00000105, cpu.registers.registers[11]);
-    if (cpu.registers.registers[12] != 32'h00000155) $error("Expected X%02d to be %08x but got %08x", 12, 32'h00000155, cpu.registers.registers[12]);
-    if (cpu.registers.registers[13] != 32'h000000F0) $error("Expected X%02d to be %08x but got %08x", 13, 32'h000000F0, cpu.registers.registers[13]);
-    if (cpu.registers.registers[14] != 32'h0000070F) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0000070F, cpu.registers.registers[14]);
-    if (cpu.registers.registers[15] != 32'h000007FF) $error("Expected X%02d to be %08x but got %08x", 15, 32'h000007FF, cpu.registers.registers[15]);
-
-    while (address != 32'hd8) // End of slli
+    $info("Testing BGEU");
+    while (address != 32'hE4) // End of BGEU
     begin
       #10
       clk = 1;
       #10
       clk = 0;
     end
-
-    if (cpu.registers.registers[9]  != 32'hFF000000) $error("Expected X%02d to be %08x but got %08x",  9, 32'h00000050, cpu.registers.registers[9] );
-    if (cpu.registers.registers[10] != 32'h07FF0000) $error("Expected X%02d to be %08x but got %08x", 10, 32'h00000050, cpu.registers.registers[10]);
-    if (cpu.registers.registers[11] != 32'h0007FF00) $error("Expected X%02d to be %08x but got %08x", 11, 32'h00000105, cpu.registers.registers[11]);
-    if (cpu.registers.registers[12] != 32'h00003FF8) $error("Expected X%02d to be %08x but got %08x", 12, 32'h00000155, cpu.registers.registers[12]);
-    if (cpu.registers.registers[13] != 32'h00001FFC) $error("Expected X%02d to be %08x but got %08x", 13, 32'h000000F0, cpu.registers.registers[13]);
-    if (cpu.registers.registers[14] != 32'h00000FFE) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0000070F, cpu.registers.registers[14]);
-    if (cpu.registers.registers[15] != 32'h000007FF) $error("Expected X%02d to be %08x but got %08x", 15, 32'h000007FF, cpu.registers.registers[15]);
-
-    while (address != 32'hfc) // End of srli
-    begin
-      #10
-      clk = 1;
-      #10
-      clk = 0;
-    end
-
-    if (cpu.registers.registers[9]  != 32'h000000FF) $error("Expected X%02d to be %08x but got %08x",  9, 32'h00000050, cpu.registers.registers[9] );
-    if (cpu.registers.registers[10] != 32'h0000FF00) $error("Expected X%02d to be %08x but got %08x", 10, 32'h00000050, cpu.registers.registers[10]);
-    if (cpu.registers.registers[11] != 32'h00FF0000) $error("Expected X%02d to be %08x but got %08x", 11, 32'h00000105, cpu.registers.registers[11]);
-    if (cpu.registers.registers[12] != 32'h1FE00000) $error("Expected X%02d to be %08x but got %08x", 12, 32'h00000155, cpu.registers.registers[12]);
-    if (cpu.registers.registers[13] != 32'h3FC00000) $error("Expected X%02d to be %08x but got %08x", 13, 32'h000000F0, cpu.registers.registers[13]);
-    if (cpu.registers.registers[14] != 32'h7F800000) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0000070F, cpu.registers.registers[14]);
-    if (cpu.registers.registers[15] != 32'hFF000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'h000007FF, cpu.registers.registers[15]);
-
-    while (address != 32'h11c) // End of srai
-    begin
-      #10
-      clk = 1;
-      #10
-      clk = 0;
-    end
-
-    if (cpu.registers.registers[9]  != 32'hFFFFFFFF) $error("Expected X%02d to be %08x but got %08x",  9, 32'hFFFFFFFF, cpu.registers.registers[9] );
-    if (cpu.registers.registers[10] != 32'hFFFFFF00) $error("Expected X%02d to be %08x but got %08x", 10, 32'hFFFFFF00, cpu.registers.registers[10]);
-    if (cpu.registers.registers[11] != 32'hFFFF0000) $error("Expected X%02d to be %08x but got %08x", 11, 32'hFFFF0000, cpu.registers.registers[11]);
-    if (cpu.registers.registers[12] != 32'hFFE00000) $error("Expected X%02d to be %08x but got %08x", 12, 32'hFFE00000, cpu.registers.registers[12]);
-    if (cpu.registers.registers[13] != 32'hFFC00000) $error("Expected X%02d to be %08x but got %08x", 13, 32'hFFC00000, cpu.registers.registers[13]);
-    if (cpu.registers.registers[14] != 32'hFF800000) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFF800000, cpu.registers.registers[14]);
-    if (cpu.registers.registers[15] != 32'hFF000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFF000000, cpu.registers.registers[15]);
-
-    while (address != 32'h12c) // End of ADD
-    begin
-      #10
-      clk = 1;
-      #10
-      clk = 0;
-    end
-
-    if (cpu.registers.registers[13] != 32'hFF000000) $error("Expected X%02d to be %08x but got %08x", 13, 32'hFF000000, cpu.registers.registers[13]);
-    if (cpu.registers.registers[14] != 32'hFEFFFFFF) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFEFFFFFF, cpu.registers.registers[14]);
-    if (cpu.registers.registers[15] != 32'hFE000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFE000000, cpu.registers.registers[15]);
-
-    while (address != 32'h13c) // End of SUB
-    begin
-      #10
-      clk = 1;
-      #10
-      clk = 0;
-    end
-
-    if (cpu.registers.registers[13] != 32'h01000000) $error("Expected X%02d to be %08x but got %08x", 13, 32'h01000000, cpu.registers.registers[13]);
-    if (cpu.registers.registers[14] != 32'hFF000001) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFF000001, cpu.registers.registers[14]);
-    if (cpu.registers.registers[15] != 32'h00000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'h00000000, cpu.registers.registers[15]);
 
     #100
 

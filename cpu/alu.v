@@ -19,6 +19,8 @@ parameter ShiftLeftUnsigned = 4'h9;
 parameter ShiftLeftSigned = 4'hA;
 parameter GreaterThanOrEqualUnsigned = 4'hB;
 parameter GreaterThanOrEqualSigned = 4'hC;
+parameter Equal = 4'hD;
+parameter NotEqual = 4'hE;
 
 reg [31:0] result;
 
@@ -38,8 +40,10 @@ begin
     ShiftRightSigned:           result = $signed(X) >>> (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) >>> i;  // OMG THATS HORRIBLE
     ShiftLeftUnsigned:          result = X << (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X << i;            // OMG THATS HORRIBLE
     ShiftLeftSigned:            result = $signed(X) <<< (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) <<< i;  // OMG THATS HORRIBLE
-    GreaterThanOrEqualUnsigned: result = X >=  Y;
+    GreaterThanOrEqualUnsigned: result = X >= Y;
     GreaterThanOrEqualSigned:   result = $signed(X) >= $signed(Y);
+    Equal:                      result = X == Y;
+    NotEqual:                   result = X != Y;
     default:                    result = 0;
   endcase
 end
