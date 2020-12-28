@@ -5,3 +5,4 @@
 *.elf
 *.hex
 testdata/*.bin
+*.gtkw

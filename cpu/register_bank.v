@@ -25,4 +25,13 @@ end
 
 assign dataOut = registers[regNum];
 
+// Only for simulation expose the registers
+generate
+  genvar idx;
+  for(idx = 0; idx < 16; idx = idx+1) begin: register
+    wire [31:0] tmp;
+    assign tmp = registers[idx];
+  end
+endgenerate
+
 endmodule

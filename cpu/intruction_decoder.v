@@ -6,7 +6,7 @@ module InstructionDecoder (
   input   wire  [31:0]  dataIn,
   output  reg   [31:0]  dataOut,
   output  reg   [31:0]  address,
-  output                busWriteEnable,     // 1 => WRITE, 0 => READ
+  output  reg           busWriteEnable,     // 1 => WRITE, 0 => READ
 
   // PC Control
   input   wire  [31:0]  pcDataOut,
@@ -27,12 +27,17 @@ module InstructionDecoder (
   output  reg   [31:0]   aluY
 );
 
+localparam Fetch0   = 4'h0;
+localparam Fetch1   = 4'h1;
+localparam Decode   = 4'h2;
+localparam Execute0 = 4'h3;
+localparam Execute1 = 4'h4;
+localparam Execute2 = 4'h5;
+localparam Execute3 = 4'h6;
+localparam Execute4 = 4'h7;
+localparam Execute5 = 4'h8;
 
-localparam Fetch   = 3'b000;
-localparam Decode  = 3'b001;
-localparam Execute = 3'b010;
-
-reg   [2:0]  currentState;
+reg   [3:0]  currentState;
 
 // Input alias
 wire  [6:0]  inputOpcode = dataIn[6:0];
@@ -57,66 +62,103 @@ reg   [31:0]  imm;
 reg   [6:0]   opcode;
 reg   [2:0]   funct3;
 reg   [6:0]   funct7;
+reg   [31:0]  tmpInstruction; // Only used in simulation
 
 always @(posedge clk)
 begin
   if (reset)
   begin
-    currentState <= Fetch;
+    // Instruction Decoder
+    currentState    <= Fetch0;
+    rs1             <= 0;
+    rs2             <= 0;
+    rd              <= 0;
+    imm             <= 0;
+
+    opcode          <= 0;
+    funct3          <= 0;
+    funct7          <= 0;
+    tmpInstruction  <= 0;
+
+    // BUS
+    dataOut         <= 0;
+    address         <= 0;
+    busWriteEnable  <= 0;
+
+    // ALU
+    aluX            <= 0;
+    aluY            <= 0;
+    aluOp           <= 0;
+
+    // Program Counter
+    pcCountEnable   <= 0;
+    pcWriteEnable   <= 0;
+    pcDataIn        <= 0;
+
+    // Register Bank
+    regIn           <= 0;
+    regNum          <= 0;
+    regWriteEnable  <= 0;
   end
   else
   begin
-    if (currentState == Fetch)        //  1. Set Bus Address = PC, Set PC Count = 1
+    if (currentState == Fetch0)        //  1. Set Bus Address = PC, Set PC Count = 1
     begin
-        address       <= pcDataIn;
+        address       <= pcDataOut;
         pcCountEnable <= 1;
-        currentState  <= Decode;
+        currentState  <= Fetch1;
+    end
+    else if (currentState == Fetch1)
+    begin
+      // Disable Program Counter Count
+      pcCountEnable   <= 0;
+      // BUS Data should be ready in next cycle
+      currentState    <= Decode;
     end
     else if (currentState == Decode)  //  2. READ Bus Data -> Instruction Holder, Set PC Count = 0
     begin
-      // Disable Program Counter Count
-      pcCountEnable <= 0;
 
       // Decode Instruction
-      opcode        <= inputOpcode;
-      funct3        <= inputFunct3;
-      funct7        <= inputFunct7;
-      rd            <= inputRd;
-      rs1           <= inputRs1;
-      rs2           <= inputRs2;
+      tmpInstruction  <= dataIn;
+      opcode          <= inputOpcode;
+      funct3          <= inputFunct3;
+      funct7          <= inputFunct7;
+      rd              <= inputRd;
+      rs1             <= inputRs1;
+      rs2             <= inputRs2;
 
       // Decode IMM where relevant
-      if (opcode == 7'b0010011 || opcode == 7'b1100111)       // Type I instructions
+      if (inputOpcode == 7'b0010011 || inputOpcode == 7'b1100111)       // Type I instructions
       begin
-        if (funct3 == 3'b001 || funct3 == 3'b101) // Direct
+        if (inputFunct3 == 3'b001 || inputFunct3 == 3'b101) // Direct
           imm <= immTypeI;
         else // Sign Extend
           imm <= { {20{immTypeI[11]}}, immTypeI[11:0] };
       end
-      else if (opcode == 7'b0100011)                          // Type S instructions
+      else if (inputOpcode == 7'b0100011)                          // Type S instructions
       begin
           imm <= { {20{immTypeS[11]}}, immTypeS[11:0] };
       end
-      else if (opcode == 7'b1100011)                          // Type B instructions
+      else if (inputOpcode == 7'b1100011)                          // Type B instructions
       begin
           imm <= { {19{immTypeB[12]}}, immTypeB[12:0] };
       end
-      else if (opcode == 7'b0010111 || opcode == 7'b0110111)  // Type U instructions
+      else if (inputOpcode == 7'b0010111 || inputOpcode == 7'b0110111)  // Type U instructions
       begin
           imm <= { immTypeU[19:0], 11'b0 };
       end
-      else if (opcode == 7'b1101111)                          // Type J instructions
+      else if (inputOpcode == 7'b1101111)                          // Type J instructions
       begin
           imm <= { {11{immTypeJ[19]}}, immTypeJ[19:0] };
       end
-      currentState  <= Execute;
+      currentState  <= Execute0;
     end
     else // Execute State
     begin
         if (opcode == 7'b0010011) // addi, slti, sltiu, xori, ori, andi, slli, srli, srai
         begin
           case (currentState)
-            3: // 3. Set regNum = rs1, Set ALU OP = CORRECT OPER, Set ALU Y = IMM
+            Execute0: // 3. Set regNum = rs1, Set ALU OP = CORRECT OPER, Set ALU Y = IMM
             begin
               regNum          <= rs1;
               case (funct3)
@@ -125,72 +167,72 @@ begin
                 2: aluOp      <= alu.LesserThanSigned;
                 3: aluOp      <= alu.LesserThanUnsigned;
                 4: aluOp      <= alu.XOR;
-                5: aluOp      <= imm[30] ? alu.ShiftRightSigned : alu.ShiftRightUnsigned;
+                5: aluOp      <= imm[10] ? alu.ShiftRightSigned : alu.ShiftRightUnsigned;
                 6: aluOp      <= alu.OR;
                 7: aluOp      <= alu.AND;
               endcase
               aluY            <= funct3 == 5 ? {27'b0, imm[4:0]} : imm;
               currentState    <= currentState + 1;
             end
-            4: // 4. Read regOut store in ALU X, Set regNum = rd
+            Execute1: // 4. Read regOut store in ALU X, Set regNum = rd
             begin
               aluX            <= regOut;
               regNum          <= rd;
               currentState    <= currentState + 1;
             end
-            5: // 5. Read ALU O store in regIn, Set regWriteEnable = 1
+            Execute2: // 5. Read ALU O store in regIn, Set regWriteEnable = 1
             begin
               regIn           <= aluO;
               regWriteEnable  <= 1;
               currentState    <= currentState + 1;
             end
-            6: // 6. Set regWriteEnable = 0
+            Execute3: // 6. Set regWriteEnable = 0
             begin
               regWriteEnable  <= 0;
-              currentState    <= Fetch;
+              currentState    <= Fetch0;
             end
           endcase
         end
         else if (opcode == 7'b0110011) // add, sub, sll, slt, sltu, xor, srl, sra, or, and
         begin
           case (currentState)
-            3: // 3. Set regNum = rs1, Set ALU OP = CORRECT OPER
+            Execute0: // 3. Set regNum = rs1, Set ALU OP = CORRECT OPER
             begin
               regNum          <= rs1;
               case (funct3)
-                0: aluOp      <= imm[30] ? alu.ADD : alu.SUB;
+                0: aluOp      <= funct7[5] ? alu.SUB : alu.ADD;
                 1: aluOp      <= alu.ShiftLeftUnsigned;
                 2: aluOp      <= alu.LesserThanSigned;
                 3: aluOp      <= alu.LesserThanUnsigned;
                 4: aluOp      <= alu.XOR;
-                5: aluOp      <= imm[30] ? alu.ShiftRightSigned : alu.ShiftRightUnsigned;
+                5: aluOp      <= funct7[5] ? alu.ShiftRightSigned : alu.ShiftRightUnsigned;
                 6: aluOp      <= alu.OR;
                 7: aluOp      <= alu.AND;
               endcase
               currentState    <= currentState + 1;
             end
-            4: // 4. Read regOut store in ALU X, Set regNum = rs2
+            Execute1: // 4. Read regOut store in ALU X, Set regNum = rs2
             begin
               aluX            <= regOut;
               regNum          <= rs2;
               currentState    <= currentState + 1;
             end
-            5: // 5. Read regOut store in ALU Y, Set regNum = rd
+            Execute2: // 5. Read regOut store in ALU Y, Set regNum = rd
             begin
               aluY            <= regOut;
               regNum          <= rd;
               currentState    <= currentState + 1;
             end
-            6: // 6. Read ALU O store in regIn, Set regWriteEnable = 1
+            Execute3: // 6. Read ALU O store in regIn, Set regWriteEnable = 1
             begin
               regIn           <= aluO;
               regWriteEnable  <= 1;
               currentState    <= currentState + 1;
             end
-            7: // 7. Set regWriteEnable = 0
+            Execute4: // 7. Set regWriteEnable = 0
             begin
               regWriteEnable  <= 0;
-              currentState    <= Fetch;
+              currentState    <= Fetch0;
             end
           endcase
         end

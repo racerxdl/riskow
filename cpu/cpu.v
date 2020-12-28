@@ -10,11 +10,11 @@ module CPU (
 );
 
 // Program Counter
-wire  [31:0]   pcOut;
+wire  [31:0]   pcDataOut;
 wire  [31:0]   pcDataIn;
 wire           pcWriteEnable;
 wire           pcCountEnable;
-ProgramCounter PC(clk, reset, pcDataIn, pcOut, pcWriteEnable, pcCountEnable);
+ProgramCounter PC(clk, reset, pcDataIn, pcDataOut, pcWriteEnable, pcCountEnable);
 
 // Register Bank
 wire  [31:0]  regIn;
@@ -43,7 +43,7 @@ InstructionDecoder ins(
   busWriteEnable,
 
   // PC Control
-  pcOut,
+  pcDataOut,
   pcWriteEnable,
   pcCountEnable,
   pcDataIn,

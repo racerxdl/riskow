@@ -42,20 +42,20 @@ all : top.svf
 testdata:
 	@echo "Generating test data"
 	@cd testdata; for test in $(TESTGEN); do echo "	Running $$test"; python3 $$test; cd ..; done
+	@cd testdata && $(MAKE) clean && $(MAKE) testmem
 
 %.dsn.result: %.dsn testdata
 	@echo "Running $(@:%.dsn.result=%.dsn) -> $@"
-	@$(VVP) $(@:%.dsn.result=%.dsn) | tee $@
+	$(VVP) $(@:%.dsn.result=%.dsn) | tee $@
 	@!(cat $@ | grep -q NOK) || (echo "Test $@ failed $$?"; exit 1)
 
 %.dsn: %.v
 	@echo "Generating $< -> $@"
-	@$(IVERILOG) -o $@ $< $(SOURCES)
+	$(IVERILOG) -o $@ $< $(SOURCES)
 
 test: $(TB_DSN) $(TB_DSN_RES)
 	@for test in $<; do echo "Running test $$test"; done
 # 	echo "test $<"
-
 
 artifacts: test top.svf
 	@echo "Composing artifacts"
