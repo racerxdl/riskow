@@ -157,7 +157,7 @@ begin
       end
       else if (inputOpcode == 7'b1101111)                          // Type J instructions
       begin
-          imm <= { {11{immTypeJ[19]}}, immTypeJ[19:0] };
+          imm <= { {12{immTypeJ[19]}}, immTypeJ[19:0] };
       end
       currentState  <= Execute0;
     end

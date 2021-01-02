@@ -4,7 +4,7 @@ module CPUTest;
 
   localparam ms = 1e6;
   localparam us = 1e3;
-  localparam memorySize = 16384;
+  localparam memorySize = 131072;
 
   integer i, j;
 
@@ -426,9 +426,9 @@ module CPUTest;
       clk = 0;
     end
 
-    if (memory[32'h2000 >> 2] != 32'h81      ) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h2000, 32'h81       ,memory[32'h2000 >> 2]);
-    if (memory[32'h2004 >> 2] != 32'h8281    ) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h2004, 32'h8281     ,memory[32'h2004 >> 2]);
-    if (memory[32'h2008 >> 2] != 32'h84838281) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h2008, 32'h84838281 ,memory[32'h2008 >> 2]);
+    if (memory[32'h10000 >> 2] != 32'h81      ) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10000, 32'h81       ,memory[32'h10000 >> 2]);
+    if (memory[32'h10004 >> 2] != 32'h8281    ) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10004, 32'h8281     ,memory[32'h10004 >> 2]);
+    if (memory[32'h10008 >> 2] != 32'h84838281) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10008, 32'h84838281 ,memory[32'h10008 >> 2]);
 
     while (address != 32'hb8) // End of Unaligned Store
     begin
@@ -439,14 +439,14 @@ module CPUTest;
     end
 
 
-    if (memory[32'h2000 >> 2] != 32'h00000081) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h2000, 32'h00000081 ,memory[32'h2000 >> 2]);
-    if (memory[32'h2004 >> 2] != 32'h00008100) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h2004, 32'h00008100 ,memory[32'h2004 >> 2]);
-    if (memory[32'h2008 >> 2] != 32'h00810000) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h2008, 32'h00810000 ,memory[32'h2008 >> 2]);
-    if (memory[32'h200C >> 2] != 32'h81000000) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h200C, 32'h81000000 ,memory[32'h200C >> 2]);
+    if (memory[32'h10000 >> 2] != 32'h00000081) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10000, 32'h00000081 ,memory[32'h10000 >> 2]);
+    if (memory[32'h10004 >> 2] != 32'h00008100) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10004, 32'h00008100 ,memory[32'h10004 >> 2]);
+    if (memory[32'h10008 >> 2] != 32'h00810000) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10008, 32'h00810000 ,memory[32'h10008 >> 2]);
+    if (memory[32'h1000C >> 2] != 32'h81000000) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h1000C, 32'h81000000 ,memory[32'h1000C >> 2]);
 
-    if (memory[32'h2010 >> 2] != 32'h00008281) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h2000, 32'h00008281 ,memory[32'h200F >> 2]);
-    if (memory[32'h2014 >> 2] != 32'h00828100) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h2004, 32'h00828100 ,memory[32'h2010 >> 2]);
-    if (memory[32'h2018 >> 2] != 32'h82810000) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h2008, 32'h82810000 ,memory[32'h2014 >> 2]);
+    if (memory[32'h10010 >> 2] != 32'h00008281) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10000, 32'h00008281 ,memory[32'h1000F >> 2]);
+    if (memory[32'h10014 >> 2] != 32'h00828100) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10004, 32'h00828100 ,memory[32'h10010 >> 2]);
+    if (memory[32'h10018 >> 2] != 32'h82810000) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10008, 32'h82810000 ,memory[32'h10014 >> 2]);
 
     #100
 

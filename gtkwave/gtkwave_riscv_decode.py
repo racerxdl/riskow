@@ -22,7 +22,8 @@ def main():
             asm_temp.write(".word 0x%s\n" % l)
             asm_temp.flush()
             subprocess.run(["riscv64-linux-gnu-as", "-march=rv32i", "-o", obj_temp.name, asm_temp.name])
-            result = subprocess.run(["riscv64-linux-gnu-objdump", "-d", obj_temp.name, "-M", "no-aliases", "-M", "numeric"], capture_output=True)
+            #result = subprocess.run(["riscv64-linux-gnu-objdump", "-d", obj_temp.name, "-M", "no-aliases", "-M", "numeric"], capture_output=True)
+            result = subprocess.run(["riscv64-linux-gnu-objdump", "-d", obj_temp.name, "-M", "no-aliases"], capture_output=True)
             lastline = result.stdout.splitlines()[-1]
             chunks = lastline.decode().split('\t')
 
