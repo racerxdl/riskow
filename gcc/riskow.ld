@@ -2,6 +2,7 @@
 MEMORY
 {
     MEM (rwx) : ORIGIN = 0x00000000, LENGTH = 0x2000
+    MEM2 (rwx): ORIGIN = 0x00002000, LENGTH = 0x2000
 }
 SECTIONS
 {
@@ -18,5 +19,5 @@ SECTIONS
         *(.bss)
         *(.rela*)
         *(COMMON)
-    } > MEM
+    } > MEM2
 }

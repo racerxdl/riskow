@@ -28,7 +28,7 @@ module InstructionDecoder (
   output  reg   [31:0]   aluY
 );
 
-localparam ExceptionHandlerAddress = 32'hFFFF0000;
+localparam ExceptionHandlerAddress = 32'h5E_F0DE0;
 
 localparam Fetch0   = 4'h0;
 localparam Fetch1   = 4'h1;
@@ -43,17 +43,21 @@ localparam Execute5 = 4'h8;
 reg   [3:0]  currentState;
 
 // Input alias
-wire  [6:0]  inputOpcode = dataIn[6:0];
-wire  [2:0]  inputFunct3 = dataIn[14:12];
-wire  [6:0]  inputFunct7 = dataIn[31:25];
-wire  [4:0]  inputRd     = dataIn[11:7];
-wire  [4:0]  inputRs1    = dataIn[19:15];
-wire  [4:0]  inputRs2    = dataIn[24:20];
-wire  [11:0] immTypeI    = dataIn[31:20];
-wire  [11:0] immTypeS    = {dataIn[31:25], dataIn[11:7]};
-wire  [12:0] immTypeB    = {dataIn[31], dataIn[7], dataIn[30:25], dataIn[11:8], 1'b0};
-wire  [19:0] immTypeU    = dataIn[31:12];
-wire  [19:0] immTypeJ    = {dataIn[31], dataIn[19:12], dataIn[20], dataIn[30:21], 1'b0};
+wire  [6:0]  inputOpcode      = dataIn[6:0];
+wire  [2:0]  inputFunct3      = dataIn[14:12];
+wire  [6:0]  inputFunct7      = dataIn[31:25];
+wire  [4:0]  inputRd          = dataIn[11:7];
+wire  [4:0]  inputRs1         = dataIn[19:15];
+wire  [4:0]  inputRs2         = dataIn[24:20];
+wire  [11:0] immTypeI         = dataIn[31:20];
+wire  [11:0] immTypeS         = {dataIn[31:25], dataIn[11:7]};
+wire  [12:0] immTypeB         = {dataIn[31], dataIn[7], dataIn[30:25], dataIn[11:8], 1'b0};
+wire  [19:0] immTypeU         = dataIn[31:12];
+wire  [19:0] immTypeJ         = {dataIn[31], dataIn[19:12], dataIn[20], dataIn[30:21], 1'b0};
+
+// Alias for using on load/store
+wire  [1:0]  inputByteOffset  = aluO[1:0];
+wire  [1:0]  numberOfBytes    = funct3[1:0]; // Actuallly 2^numberOfBytes
 
 // Instruction Arguments
 reg   [4:0]   rs1;
@@ -406,8 +410,8 @@ begin
             Execute2: // 5. Set Bus Address = alu O
             begin
               if (
-                  (aluO[1:0] != 0 && funct3[1:0] == 2) || // 32 bit read beyond boundary
-                  (aluO[1:0] == 3 && funct3[1:0] == 1)    // 16 bit read beyond boundary
+                  (inputByteOffset != 0 && numberOfBytes == 2) || // 32 bit read beyond boundary
+                  (inputByteOffset == 3 && numberOfBytes == 1)    // 16 bit read beyond boundary
                 )
               begin
                   // Misaligned Exception
@@ -415,7 +419,7 @@ begin
                   currentState    <= Execute5;
                   pcDataIn        <= ExceptionHandlerAddress;
                   regNum          <= 1;
-                  regIn           <= pcDataOut;
+                  regIn           <= pcDataOut - 4;
                   regWriteEnable  <= 1;
                   pcWriteEnable   <= 1;
               end
@@ -431,10 +435,10 @@ begin
             end
             Execute4: // 7. rd = dataBus
             begin
-              case (aluO[1:0])
+              case (inputByteOffset)
                 0:
                 begin
-                  case (funct3[1:0])
+                  case (numberOfBytes)
                     0: regIn <= (funct3[2]) ? dataIn[7:0]  : { {24{dataIn[7]}},  dataIn[7:0]  }; // 1 byte
                     1: regIn <= (funct3[2]) ? dataIn[15:0] : { {16{dataIn[15]}}, dataIn[15:0] }; // 2 bytes
                     2: regIn <= dataIn;                                                          // 4 bytes
@@ -442,15 +446,15 @@ begin
                 end
                 1:
                 begin
-                  case (funct3[1:0])
+                  case (numberOfBytes)
                     0: regIn <= (funct3[2]) ? dataIn[15:8]  : { {24{dataIn[15]}},  dataIn[15:8]  }; // 1 byte
                     1: regIn <= (funct3[2]) ? dataIn[23:8]  : { {16{dataIn[23]}},  dataIn[23:8]  }; // 2 bytes                                                            // 4 bytes
                   endcase
                 end
                 2:
                 begin
-                  case (funct3[1:0])
-                    0: regIn <= (funct3[2]) ? dataIn[23:16] : { {24{dataIn[23]}},  dataIn[23:16]  }; // 1 byte
+                  case (numberOfBytes)
+                    0: regIn <= (funct3[2]) ? dataIn[23:16] : { {24{dataIn[23]}},  dataIn[23:16] };  // 1 byte
                     1: regIn <= (funct3[2]) ? dataIn[31:16] : { {16{dataIn[31]}},  dataIn[31:16] };  // 2 bytes
                   endcase
                 end
@@ -473,81 +477,88 @@ begin
           endcase
         end
         else if (opcode == 7'b0100011) // sw, sh, sb
-        begin
-          // Still not working
-          // case (currentState)
-          //   Execute0:
-          //   begin
-          //     regNum          <= rs1;
-          //     aluX            <= imm;
-          //     aluOp           <= alu.ADD;
-          //     currentState    <= currentState + 1;
-          //   end
-          //   Execute1:
-          //   begin
-          //     aluY            <= regOut;
-          //     regNum          <= rs2;
-          //     currentState    <= currentState + 1;
-          //   end
-          //   Execute2:
-          //   begin
-          //     if (
-          //         (aluO[1:0] != 0 && funct3[1:0] == 2) || // 32 bit write beyond boundary
-          //         (aluO[1:0] == 3 && funct3[1:0] == 1)    // 16 bit write beyond boundary
-          //       )
-          //     begin
-          //         // Misaligned Exception
-          //         // TODO: Better diagnostics
-          //         currentState    <= Execute5;
-          //         pcDataIn        <= ExceptionHandlerAddress;
-          //         regNum          <= 1;
-          //         regIn           <= pcDataOut;
-          //         regWriteEnable  <= 1;
-          //         pcWriteEnable   <= 1;
-          //     end
-          //     else
-          //     begin
-          //       address           <= {aluO[31:2], 2'b00};
-          //       currentState      <= currentState + 1;
-          //     end
-          //   end
-          //   Execute3: // 6. Wait bus
-          //   begin
-          //     currentState  <= currentState + 1;
-          //   end
-          //   Execute4:
-          //   begin
-          //     case (aluO[1:0])
-          //       0:
-          //       begin
-          //         case (funct3[1:0])
-          //           0: regIn <= (funct3[2]) ? dataIn[7:0]  : { {24{dataIn[7]}},  dataIn[7:0]  }; // 1 byte
-          //           1: regIn <= (funct3[2]) ? dataIn[15:0] : { {16{dataIn[15]}}, dataIn[15:0] }; // 2 bytes
-          //           2: regIn <= dataIn;                                                          // 4 bytes
-          //         endcase
-          //       end
-          //       1:
-          //       begin
-          //         case (funct3[1:0])
-          //           0: regIn <= (funct3[2]) ? dataIn[15:8]  : { {24{dataIn[15]}},  dataIn[15:8]  }; // 1 byte
-          //           1: regIn <= (funct3[2]) ? dataIn[23:8]  : { {16{dataIn[23]}},  dataIn[23:8]  }; // 2 bytes                                                            // 4 bytes
-          //         endcase
-          //       end
-          //       2:
-          //       begin
-          //         case (funct3[1:0])
-          //           0: regIn <= (funct3[2]) ? dataIn[23:16] : { {24{dataIn[23]}},  dataIn[23:16]  }; // 1 byte
-          //           1: regIn <= (funct3[2]) ? dataIn[31:16] : { {16{dataIn[31]}},  dataIn[31:16] };  // 2 bytes
-          //         endcase
-          //       end
-          //       3:
-          //       begin
-          //         regIn <= (funct3[2]) ? dataIn[31:24]  : { {24{dataIn[31]}},  dataIn[31:24]  };   // 1 byte
-          //       end
-          //     endcase
-          //     busWriteEnable <= 1;
-          //   end
-          // endcase
+        begin // M[x[rs1] + sext(imm)] = x[rs2][n:0]
+          case (currentState)
+            Execute0: // 3. Set regNum = rs1, aluX = imm, aluOp = ADD
+            begin
+              regNum          <= rs1;
+              aluX            <= imm;
+              aluOp           <= alu.ADD;
+              currentState    <= currentState + 1;
+            end
+            Execute1: // 4. aluY = regOut, regNum = rs2
+            begin
+              aluY            <= regOut;
+              regNum          <= rs2;
+              currentState    <= currentState + 1;
+            end
+            Execute2: // 5. Check Alignment, set Address = {aluO[31:2], 2'b00}
+            begin
+              if (
+                  (inputByteOffset != 0 && numberOfBytes == 2) || // 32 bit write beyond boundary
+                  (inputByteOffset == 3 && numberOfBytes == 1)    // 16 bit write beyond boundary
+                )
+              begin
+                  // Misaligned Exception
+                  // TODO: Better diagnostics
+                  currentState    <= Execute5;
+                  pcDataIn        <= ExceptionHandlerAddress;
+                  regNum          <= 1;
+                  regIn           <= pcDataOut - 4;
+                  regWriteEnable  <= 1;
+                  pcWriteEnable   <= 1;
+              end
+              else
+              begin
+                address           <= {aluO[31:2], 2'b00};
+                currentState      <= currentState + 1;
+              end
+            end
+            Execute3: // 6. Wait bus
+            begin
+              currentState  <= currentState + 1;
+            end
+            Execute4: // 7. Write bus
+            begin
+              case (inputByteOffset)    // Input Byte
+                0:
+                begin
+                  case (numberOfBytes)  // Number of bytes
+                    0: dataOut <= {dataIn[31:8], regOut[7:0]};    // 1 byte
+                    1: dataOut <= {dataIn[31:16], regOut[15:0]};  // 2 bytes
+                    2: dataOut <= regOut;                         // 4 bytes
+                  endcase
+                end
+                1:
+                begin
+                  case (numberOfBytes)
+                    0: dataOut <= {dataIn[31:16], regOut[7:0], dataIn[7:0]};  // 1 byte
+                    1: dataOut <= {dataIn[31:24], regOut[15:0], dataIn[7:0]}; // 2 bytes
+                  endcase
+                end
+                2:
+                begin
+                  case (numberOfBytes)
+                    0: dataOut <= {dataIn[31:24], regOut[7:0], dataIn[15:0]}; // 1 byte
+                    1: dataOut <= {regOut[15:0], dataIn[15:0]};               // 2 bytes
+                  endcase
+                end
+                3:
+                begin
+                  dataOut <= {regOut[7:0], dataIn[23:0]}; // 1 byte
+                end
+              endcase
+              busWriteEnable    <= 1;
+              currentState      <= currentState + 1;
+            end
+            Execute5:
+            begin
+              busWriteEnable    <= 0;
+              regWriteEnable    <= 0;
+              pcWriteEnable     <= 0;
+              currentState      <= Fetch0;
+            end
+          endcase
         end
     end
   end
