@@ -1,18 +1,20 @@
 #include "main.h"
 
 int main() {
-  uint32_t t = 0;
-  uint8_t b = 0;
-
   setBitDirection(LED_PORT, LED_PIN, OUTPUT);
 
+  setDivideBy(64);
+  resetTimer();
+  startTimer();
+
   while(1) {
-    setBit(LED_PORT, LED_PIN, b);
-    while(t < 1041666) { // Wait half second
-      t++;
+    for(int i = 0; i < 6; i++) {
+      setBit(LED_PORT, LED_PIN, HIGH);
+      sleep(100);
+      setBit(LED_PORT, LED_PIN, LOW);
+      sleep(100);
     }
-    t = 0;
-    b = ~b;
+    sleep(5000);
   }
 
   return 0;

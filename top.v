@@ -28,13 +28,20 @@ wire          portChipSelectA;
 wire          portChipSelectB;
 wire          portWriteIO;
 wire          portWriteDirection;
-
 wire  [31:0]  _IOPortA;
 wire  [31:0]  _IOPortB;
+
+// Timer 0
+wire  [31:0]  t0DataIn;
+wire  [31:0]  t0DataOut;
+wire          t0ChipSelect;
+wire          t0Write;
+wire          t0WriteCommand;
 
 CPU         cpu   (clk, reset, cpuDataIn, cpuDataOut, cpuAddress, cpuBusWriteEnable);
 DigitalPort portA (clk, reset, portChipSelectA, portWriteIO, portWriteDirection, portDataIn, portDataOutA, _IOPortA);
 DigitalPort portB (clk, reset, portChipSelectB, portWriteIO, portWriteDirection, portDataIn, portDataOutB, _IOPortB);
+Timer       t0    (clk, reset, t0ChipSelect, t0Write, t0WriteCommand, t0DataIn, t0DataOut);
 
 assign led = _IOPortB[0];
 
@@ -71,6 +78,10 @@ begin
         // if (portChipSelectA) $info("Wrote %08x on PORTA (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
         // if (portChipSelectB) $info("Wrote %08x on PORTB (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
       end
+      else if (t0ChipSelect)
+      begin
+        // Nothing
+      end
       else
       begin
         // $error("Ummapped Memory Write at 0x%08x", busAddress);
@@ -84,6 +95,7 @@ begin
       else if (excpChipSelect)  busDataOut <= EXCP[busAddress[9:2]-10'h1E0]; // 0x53F0DE0 offset
       else if (portChipSelectA) busDataOut <= portDataOutA;
       else if (portChipSelectB) busDataOut <= portDataOutB;
+      else if (t0ChipSelect)    busDataOut <= t0DataOut;
       else
       begin
         // $error("Ummapped Memory Access at 0x%08x", busAddress);
@@ -117,5 +129,15 @@ assign busDataIn          = cpuDataOut;
 assign romChipSelect      = {busAddress[31:16], 16'b0} == 32'h00000000;
 assign ramChipSelect      = {busAddress[31:16], 16'b0} == 32'h00010000;
 assign excpChipSelect     = {busAddress[31:16], 16'b0} == 32'h05E00000;
+
+// Timer 0
+// IO ADDR = 0xF1000000
+// Data => 0xF1000000
+// CMD  => 0xF1000001
+assign t0ChipSelect       = {busAddress[31:3], 3'b000} == 32'hF1000000;
+assign t0Write            = busAddress[2:0]   == 3'h0 && busWriteEnable;
+assign t0WriteCommand     = busAddress[2:0]   == 3'h4 && busWriteEnable;
+assign t0DataIn           = busDataIn;
+
 
 endmodule
