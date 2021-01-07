@@ -35,12 +35,12 @@ module RegisterBankTest;
 
     // Test reset
     if (dataOut != 0) $error("Expected dataOut to be %d but got %d.", 0, dataOut);
-    for (i = 0; i < 16; i++)
+    for (i = 1; i < 16; i++)
     begin
       if (dut.registers[i] != 0) $error("Expected registers[%d] to be %d but got %d.", i, 0, dut.registers[i]);
     end
 
-    for (i = 0; i < 16; i++)
+    for (i = 1; i < 16; i++)
     begin
       // Reset
       clk = 0;

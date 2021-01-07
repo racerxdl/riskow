@@ -8,7 +8,7 @@ int main() {
 
   while(1) {
     setBit(LED_PORT, LED_PIN, b);
-    while(t < 16) { // Wait half second
+    while(t < 1041666) { // Wait half second
       t++;
     }
     t = 0;

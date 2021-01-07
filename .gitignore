@@ -6,3 +6,8 @@
 *.hex
 testdata/*.bin
 *.gtkw
+syn.ys
+top-post-route.json
+top.config
+top.json
+top.svf

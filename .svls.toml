@@ -1,0 +1,6 @@
+[verilog]
+include_paths = ["cpu"]
+defines = ["DEBUG", "VAR=1"]
+
+[option]
+linter = true

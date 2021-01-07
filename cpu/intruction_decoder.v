@@ -28,6 +28,22 @@ module InstructionDecoder (
   output  reg   [31:0]   aluY
 );
 
+parameter ADD = 4'h0;
+parameter SUB = 4'h1;
+parameter OR = 4'h2;
+parameter XOR = 4'h3;
+parameter AND = 4'h4;
+parameter LesserThanUnsigned = 4'h5;
+parameter LesserThanSigned = 4'h6;
+parameter ShiftRightUnsigned = 4'h7;
+parameter ShiftRightSigned = 4'h8;
+parameter ShiftLeftUnsigned = 4'h9;
+parameter ShiftLeftSigned = 4'hA;
+parameter GreaterThanOrEqualUnsigned = 4'hB;
+parameter GreaterThanOrEqualSigned = 4'hC;
+parameter Equal = 4'hD;
+parameter NotEqual = 4'hE;
+
 localparam ExceptionHandlerAddress = 32'h5E_F0DE0;
 
 localparam Fetch0   = 4'h0;
@@ -170,14 +186,14 @@ begin
             begin
               regNum          <= rs1;
               case (funct3)
-                0: aluOp      <= alu.ADD;
-                1: aluOp      <= alu.ShiftLeftUnsigned;
-                2: aluOp      <= alu.LesserThanSigned;
-                3: aluOp      <= alu.LesserThanUnsigned;
-                4: aluOp      <= alu.XOR;
-                5: aluOp      <= imm[10] ? alu.ShiftRightSigned : alu.ShiftRightUnsigned;
-                6: aluOp      <= alu.OR;
-                7: aluOp      <= alu.AND;
+                0: aluOp      <= ADD;
+                1: aluOp      <= ShiftLeftUnsigned;
+                2: aluOp      <= LesserThanSigned;
+                3: aluOp      <= LesserThanUnsigned;
+                4: aluOp      <= XOR;
+                5: aluOp      <= imm[10] ? ShiftRightSigned : ShiftRightUnsigned;
+                6: aluOp      <= OR;
+                7: aluOp      <= AND;
               endcase
               aluY            <= funct3 == 5 ? {27'b0, imm[4:0]} : imm;
               currentState    <= currentState + 1;
@@ -208,14 +224,14 @@ begin
             begin
               regNum          <= rs1;
               case (funct3)
-                0: aluOp      <= funct7[5] ? alu.SUB : alu.ADD;
-                1: aluOp      <= alu.ShiftLeftUnsigned;
-                2: aluOp      <= alu.LesserThanSigned;
-                3: aluOp      <= alu.LesserThanUnsigned;
-                4: aluOp      <= alu.XOR;
-                5: aluOp      <= funct7[5] ? alu.ShiftRightSigned : alu.ShiftRightUnsigned;
-                6: aluOp      <= alu.OR;
-                7: aluOp      <= alu.AND;
+                0: aluOp      <= funct7[5] ? SUB : ADD;
+                1: aluOp      <= ShiftLeftUnsigned;
+                2: aluOp      <= LesserThanSigned;
+                3: aluOp      <= LesserThanUnsigned;
+                4: aluOp      <= XOR;
+                5: aluOp      <= funct7[5] ? ShiftRightSigned : ShiftRightUnsigned;
+                6: aluOp      <= OR;
+                7: aluOp      <= AND;
               endcase
               currentState    <= currentState + 1;
             end
@@ -251,12 +267,12 @@ begin
             begin
               regNum          <= rs1;
               case (funct3)
-                0: aluOp      <= alu.Equal;
-                1: aluOp      <= alu.NotEqual;
-                4: aluOp      <= alu.LesserThanSigned;
-                5: aluOp      <= alu.GreaterThanOrEqualSigned;
-                6: aluOp      <= alu.LesserThanUnsigned;
-                7: aluOp      <= alu.GreaterThanOrEqualUnsigned;
+                0: aluOp      <= Equal;
+                1: aluOp      <= NotEqual;
+                4: aluOp      <= LesserThanSigned;
+                5: aluOp      <= GreaterThanOrEqualSigned;
+                6: aluOp      <= LesserThanUnsigned;
+                7: aluOp      <= GreaterThanOrEqualUnsigned;
               endcase
               currentState    <= currentState + 1;
             end
@@ -299,7 +315,7 @@ begin
               regNum          <= rd;
               aluX            <= pcDataOut - 4;
               aluY            <= imm;
-              aluOp           <= alu.ADD;
+              aluOp           <= ADD;
               currentState    <= currentState + 1;
             end
             Execute1: // 4. Set regIn = ALU O, Set regWriteEnable = 1
@@ -342,7 +358,7 @@ begin
               regWriteEnable  <= 1;           // 3.3 Set regWriteEnable = 1
               aluX            <= pcDataOut-4; // 3.4 Set ALU X = pcDataOut
               aluY            <= imm;         // 3.5 Set ALU Y = sign extend (offset)
-              aluOp           <= alu.ADD;     // 3.6 Set ALU OP = ADD
+              aluOp           <= ADD;     // 3.6 Set ALU OP = ADD
               currentState    <= currentState + 1;
             end
             Execute1:
@@ -366,7 +382,7 @@ begin
             begin
               regNum          <= rs1;       // 3.1 Set regNum = rs1,
               aluX            <= imm;       // 3.4 Set ALU X = sign extend (offset)
-              aluOp           <= alu.ADD;   // 3.6 Set ALU OP = ADD
+              aluOp           <= ADD;   // 3.6 Set ALU OP = ADD
               currentState    <= currentState + 1;
             end
             Execute1:
@@ -398,7 +414,7 @@ begin
             begin
               regNum        <= rs1;
               aluX          <= imm;
-              aluOp         <= alu.ADD;
+              aluOp         <= ADD;
               currentState  <= currentState + 1;
             end
             Execute1: // 4. Alu Y = regOut, regNum = rd
@@ -483,7 +499,7 @@ begin
             begin
               regNum          <= rs1;
               aluX            <= imm;
-              aluOp           <= alu.ADD;
+              aluOp           <= ADD;
               currentState    <= currentState + 1;
             end
             Execute1: // 4. aluY = regOut, regNum = rs2

@@ -1,9 +1,12 @@
-module Riskow (
+module top (
   input         clk,
-  input         reset,
-  inout [31:0]  IOPortA,
-  inout [31:0]  IOPortB
+  input         rst,
+  inout         led
+  // inout [31:0]  IOPortA,
+  // inout [31:0]  IOPortB
 );
+
+wire reset = ~rst;
 
 // BUS
 wire  [31:0]  busAddress;
@@ -26,9 +29,17 @@ wire          portChipSelectB;
 wire          portWriteIO;
 wire          portWriteDirection;
 
+wire  [31:0]  _IOPortA;
+wire  [31:0]  _IOPortB;
+
 CPU         cpu   (clk, reset, cpuDataIn, cpuDataOut, cpuAddress, cpuBusWriteEnable);
-DigitalPort portA (clk, reset, portChipSelectA, portWriteIO, portWriteDirection, portDataIn, portDataOutA, IOPortA);
-DigitalPort portB (clk, reset, portChipSelectB, portWriteIO, portWriteDirection, portDataIn, portDataOutB, IOPortB);
+DigitalPort portA (clk, reset, portChipSelectA, portWriteIO, portWriteDirection, portDataIn, portDataOutA, _IOPortA);
+DigitalPort portB (clk, reset, portChipSelectB, portWriteIO, portWriteDirection, portDataIn, portDataOutB, _IOPortB);
+
+assign led = _IOPortB[0];
+
+// assign IOPortA = {_IOPortA[0], 31'b0};
+// assign IOPortB = {_IOPortB[0], 31'b0};
 
 
 // Memory
@@ -57,13 +68,13 @@ begin
       else if (excpChipSelect)  EXCP[busAddress[9:2]-10'h1E0] <= busDataIn;
       else if (portChipSelectA || portChipSelectB)
       begin
-        if (portChipSelectA) $info("Wrote %08x on PORTA (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
-        if (portChipSelectB) $info("Wrote %08x on PORTB (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
+        // if (portChipSelectA) $info("Wrote %08x on PORTA (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
+        // if (portChipSelectB) $info("Wrote %08x on PORTB (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
       end
       else
       begin
-        $error("Ummapped Memory Write at 0x%08x", busAddress);
-        $finish;
+        // $error("Ummapped Memory Write at 0x%08x", busAddress);
+        // $finish;
       end
     end
     else
@@ -75,9 +86,9 @@ begin
       else if (portChipSelectB) busDataOut <= portDataOutB;
       else
       begin
-        $error("Ummapped Memory Access at 0x%08x", busAddress);
+        // $error("Ummapped Memory Access at 0x%08x", busAddress);
         busDataOut <= 0;
-        $finish;
+        // $finish;
       end
     end
   end

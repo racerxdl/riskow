@@ -1,0 +1,8 @@
+LOCATE COMP "clk"         SITE "P6";
+LOCATE COMP "rst"         SITE "M13";
+LOCATE COMP "led"         SITE "P11"; // LED
+
+// input         clk,
+// input         reset,
+// inout [31:0]  IOPortA,
+// inout [31:0]  IOPortB

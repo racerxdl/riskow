@@ -8,19 +8,20 @@ module RiskowTest;
   integer i, j;
   reg                 clk;
   reg                 reset;
-  wire        [31:0]  IOPortA;
-  wire        [31:0]  IOPortB;
-
-  generate
-    genvar idx;
-    for(idx = 0; idx < 32; idx = idx+1) begin: register
-      assign IOPortA[idx] = dut.portA.direction[idx] ? 1'bZ : 1'b1;
-      assign IOPortB[idx] = dut.portB.direction[idx] ? 1'bZ : 1'b1;
-    end
-  endgenerate
+  wire                led;
+  // wire        [31:0]  IOPortA;
+  // wire        [31:0]  IOPortB;
+  assign led = dut.portB.direction[0] ? 1'bZ : 1'b1;
+  // generate
+  //   genvar idx;
+  //   for(idx = 0; idx < 32; idx = idx+1) begin: register
+  //     assign IOPortA[idx] = dut.portA.direction[idx] ? 1'bZ : 1'b1;
+  //     assign IOPortB[idx] = dut.portB.direction[idx] ? 1'bZ : 1'b1;
+  //   end
+  // endgenerate
 
   // Our device under test
-  Riskow dut(clk, reset, IOPortA, IOPortB);
+  top dut(clk, reset, led);
 
   initial begin
     $dumpfile("top_tb.vcd");
@@ -34,7 +35,7 @@ module RiskowTest;
       dut.RAM[i] = 0;
     end
 
-    reset = 1;
+    reset = 0;
     clk = 0;
 
     #10
@@ -42,7 +43,7 @@ module RiskowTest;
     #10
     clk = 0;
 
-    reset = 0;
+    reset = 1;
 
     repeat(1000000)
     begin
