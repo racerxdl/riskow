@@ -6,5 +6,6 @@ typedef unsigned char uint8_t;
 typedef char int8_t;
 
 #include "io.h"
+#include "lcd.h"
 
 int main();

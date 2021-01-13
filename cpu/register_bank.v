@@ -9,6 +9,13 @@ module RegisterBank (
 
 reg [31:0] registers [0:15];
 
+initial begin
+  for ( i = 0; i < 16; i++)
+  begin
+    registers[i] = 0;
+  end
+end
+
 integer i;
 
 always @(posedge clk)

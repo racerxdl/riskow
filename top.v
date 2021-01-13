@@ -1,7 +1,8 @@
 module top (
   input         clk,
   input         rst,
-  inout         led
+  inout         led,
+  inout [5:0]   lcd
   // inout [31:0]  IOPortA,
   // inout [31:0]  IOPortB
 );
@@ -44,6 +45,7 @@ DigitalPort portB (clk, reset, portChipSelectB, portWriteIO, portWriteDirection,
 Timer       t0    (clk, reset, t0ChipSelect, t0Write, t0WriteCommand, t0DataIn, t0DataOut);
 
 assign led = _IOPortB[0];
+assign lcd = _IOPortA[5:0];
 
 // assign IOPortA = {_IOPortA[0], 31'b0};
 // assign IOPortB = {_IOPortB[0], 31'b0};
