@@ -128,9 +128,13 @@ begin
   begin
     if (currentState == Fetch0)        //  1. Set Bus Address = PC, Set PC Count = 1
     begin
-        address       <= pcDataOut;
-        pcCountEnable <= 1;
-        currentState  <= Fetch1;
+      busWriteEnable  <= 0;
+      regWriteEnable  <= 0;
+      pcWriteEnable   <= 0;
+      pcWriteAdd      <= 0;
+      address         <= pcDataOut;
+      pcCountEnable   <= 1;
+      currentState    <= Fetch1;
     end
     else if (currentState == Fetch1)
     begin
@@ -196,23 +200,18 @@ begin
                 7: aluOp      <= AND;
               endcase
               aluY            <= funct3 == 5 ? {27'b0, imm[4:0]} : imm;
-              currentState    <= currentState + 1;
+              currentState    <= Execute1;
             end
             Execute1: // 4. Read regOut store in ALU X, Set regNum = rd
             begin
               aluX            <= regOut;
               regNum          <= rd;
-              currentState    <= currentState + 1;
+              currentState    <= Execute2;
             end
             Execute2: // 5. Read ALU O store in regIn, Set regWriteEnable = 1
             begin
               regIn           <= aluO;
               regWriteEnable  <= 1;
-              currentState    <= currentState + 1;
-            end
-            Execute3: // 6. Set regWriteEnable = 0
-            begin
-              regWriteEnable  <= 0;
               currentState    <= Fetch0;
             end
           endcase
@@ -233,29 +232,24 @@ begin
                 6: aluOp      <= OR;
                 7: aluOp      <= AND;
               endcase
-              currentState    <= currentState + 1;
+              currentState    <= Execute1;
             end
             Execute1: // 4. Read regOut store in ALU X, Set regNum = rs2
             begin
               aluX            <= regOut;
               regNum          <= rs2;
-              currentState    <= currentState + 1;
+              currentState    <= Execute2;
             end
             Execute2: // 5. Read regOut store in ALU Y, Set regNum = rd
             begin
               aluY            <= regOut;
               regNum          <= rd;
-              currentState    <= currentState + 1;
+              currentState    <= Execute3;
             end
             Execute3: // 6. Read ALU O store in regIn, Set regWriteEnable = 1
             begin
               regIn           <= aluO;
               regWriteEnable  <= 1;
-              currentState    <= currentState + 1;
-            end
-            Execute4: // 7. Set regWriteEnable = 0
-            begin
-              regWriteEnable  <= 0;
               currentState    <= Fetch0;
             end
           endcase
@@ -274,18 +268,18 @@ begin
                 6: aluOp      <= LesserThanUnsigned;
                 7: aluOp      <= GreaterThanOrEqualUnsigned;
               endcase
-              currentState    <= currentState + 1;
+              currentState    <= Execute1;
             end
             Execute1: // 4. Read regOut store in ALU X, Set regNum = rs2
             begin
               aluX            <= regOut;
               regNum          <= rs2;
-              currentState    <= currentState + 1;
+              currentState    <= Execute2;
             end
             Execute2: // 5. Read regOut store in ALU Y
             begin
               aluY            <= regOut;
-              currentState    <= currentState + 1;
+              currentState    <= Execute3;
             end
             Execute3: // 6. If ALU O[0], pcWriteEnable = 1, pcWriteAdd = 1, pcDataIn = offset
             begin
@@ -294,16 +288,14 @@ begin
                 pcWriteEnable <= 1;
                 pcWriteAdd    <= 1;
                 pcDataIn      <= imm;
-                currentState  <= currentState + 1;
               end
-              else
-                currentState  <= Fetch0;
+              currentState  <= Execute4;
             end
             Execute4:
             begin
-                pcWriteEnable <= 0;
-                pcWriteAdd    <= 0;
-                currentState  <= Fetch0;
+              pcWriteEnable <= 0;
+              pcWriteAdd    <= 0;
+              currentState  <= Fetch0;
             end
           endcase
         end
@@ -316,17 +308,12 @@ begin
               aluX            <= pcDataOut - 4;
               aluY            <= imm;
               aluOp           <= ADD;
-              currentState    <= currentState + 1;
+              currentState    <= Execute1;
             end
             Execute1: // 4. Set regIn = ALU O, Set regWriteEnable = 1
             begin
               regIn           <= aluO;
               regWriteEnable  <= 1;
-              currentState    <= currentState + 1;
-            end
-            Execute2: // 5. Set regWriteEnable = 0
-            begin
-              regWriteEnable  <= 0;
               currentState    <= Fetch0;
             end
           endcase
@@ -339,11 +326,6 @@ begin
               regIn           <= imm;
               regNum          <= rd;
               regWriteEnable  <= 1;
-              currentState    <= currentState + 1;
-            end
-            Execute1: // 4. Set regWriteEnable = 0
-            begin
-              regWriteEnable  <= 0;
               currentState    <= Fetch0;
             end
           endcase
@@ -358,17 +340,17 @@ begin
               regWriteEnable  <= 1;           // 3.3 Set regWriteEnable = 1
               aluX            <= pcDataOut-4; // 3.4 Set ALU X = pcDataOut
               aluY            <= imm;         // 3.5 Set ALU Y = sign extend (offset)
-              aluOp           <= ADD;     // 3.6 Set ALU OP = ADD
-              currentState    <= currentState + 1;
+              aluOp           <= ADD;         // 3.6 Set ALU OP = ADD
+              currentState    <= Execute1;
             end
             Execute1:
             begin
               regWriteEnable  <= 0;         // 4.1 Set regWriteEnable = 0,
               pcDataIn        <= aluO;      // 4.2 Set pcDataIn = ALU O,
               pcWriteEnable   <= 1;         // 4.3 Set pcWriteEnable = 1
-              currentState    <= currentState + 1;
+              currentState    <= Execute2;
             end
-            Execute2: // 5. Set pcWriteEnable = 0
+            Execute2:
             begin
               pcWriteEnable   <= 0;
               currentState    <= Fetch0;
@@ -382,8 +364,8 @@ begin
             begin
               regNum          <= rs1;       // 3.1 Set regNum = rs1,
               aluX            <= imm;       // 3.4 Set ALU X = sign extend (offset)
-              aluOp           <= ADD;   // 3.6 Set ALU OP = ADD
-              currentState    <= currentState + 1;
+              aluOp           <= ADD;       // 3.6 Set ALU OP = ADD
+              currentState    <= Execute1;
             end
             Execute1:
             begin
@@ -391,16 +373,16 @@ begin
               regNum          <= rd;        // 4.2 Set regNum = rd
               regWriteEnable  <= 1;         // 4.3 Set regWriteEnable = 1
               regIn           <= pcDataOut; // 4.4 Set regIn = pcDataOut
-              currentState    <= currentState + 1;
+              currentState    <= Execute2;
             end
             Execute2:
             begin
               regWriteEnable  <= 0;         // 5.1 Set regWriteEnable = 0
               pcDataIn        <= aluO & ~1; // 5.2 Set pcDataIn = ALU O & ~1,
               pcWriteEnable   <= 1;         // 5.3 Set pcWriteEnable = 1
-              currentState    <= currentState + 1;
+              currentState    <= Execute3;
             end
-            Execute3: // 6 Set pcWriteEnable = 0
+            Execute3:
             begin
               pcWriteEnable   <= 0;
               currentState    <= Fetch0;
@@ -415,13 +397,13 @@ begin
               regNum        <= rs1;
               aluX          <= imm;
               aluOp         <= ADD;
-              currentState  <= currentState + 1;
+              currentState  <= Execute1;
             end
             Execute1: // 4. Alu Y = regOut, regNum = rd
             begin
               aluY          <= regOut;
               regNum        <= rd;
-              currentState  <= currentState + 1;
+              currentState  <= Execute2;
             end
             Execute2: // 5. Set Bus Address = alu O
             begin
@@ -432,7 +414,7 @@ begin
               begin
                   // Misaligned Exception
                   // TODO: Better diagnostics
-                  currentState    <= Execute5;
+                  currentState    <= Fetch0;
                   pcDataIn        <= ExceptionHandlerAddress;
                   regNum          <= 1;
                   regIn           <= pcDataOut - 4;
@@ -442,12 +424,12 @@ begin
               else
               begin
                 address       <= {aluO[31:2], 2'b00};
-                currentState  <= currentState + 1;
+                currentState  <= Execute3;
               end
             end
             Execute3: // 6. Wait bus
             begin
-              currentState  <= currentState + 1;
+              currentState  <= Execute4;
             end
             Execute4: // 7. rd = dataBus
             begin
@@ -480,15 +462,7 @@ begin
                 end
               endcase
               regWriteEnable  <= 1;
-              currentState    <= currentState + 1;
-            end
-            Execute5:
-            begin
-              regWriteEnable  <= 0;
               currentState    <= Fetch0;
-
-              // In case of misaligned R/W
-              pcWriteEnable   <= 0;
             end
           endcase
         end
@@ -500,13 +474,13 @@ begin
               regNum          <= rs1;
               aluX            <= imm;
               aluOp           <= ADD;
-              currentState    <= currentState + 1;
+              currentState    <= Execute1;
             end
             Execute1: // 4. aluY = regOut, regNum = rs2
             begin
               aluY            <= regOut;
               regNum          <= rs2;
-              currentState    <= currentState + 1;
+              currentState    <= Execute2;
             end
             Execute2: // 5. Check Alignment, set Address = {aluO[31:2], 2'b00}
             begin
@@ -517,7 +491,7 @@ begin
               begin
                   // Misaligned Exception
                   // TODO: Better diagnostics
-                  currentState    <= Execute5;
+                  currentState    <= Fetch0;
                   pcDataIn        <= ExceptionHandlerAddress;
                   regNum          <= 1;
                   regIn           <= pcDataOut - 4;
@@ -527,12 +501,12 @@ begin
               else
               begin
                 address           <= {aluO[31:2], 2'b00};
-                currentState      <= currentState + 1;
+                currentState      <= Execute3;
               end
             end
             Execute3: // 6. Wait bus
             begin
-              currentState  <= currentState + 1;
+              currentState  <= Execute4;
             end
             Execute4: // 7. Write bus
             begin
@@ -565,13 +539,6 @@ begin
                 end
               endcase
               busWriteEnable    <= 1;
-              currentState      <= currentState + 1;
-            end
-            Execute5:
-            begin
-              busWriteEnable    <= 0;
-              regWriteEnable    <= 0;
-              pcWriteEnable     <= 0;
               currentState      <= Fetch0;
             end
           endcase
@@ -580,15 +547,5 @@ begin
   end
 end
 
-/*
-imm[11:5]             rs2   rs1 000 imm[4:0]    0100011 S sb      M[x[rs1] + sext(imm)] = x[rs2][7:0]
-imm[11:5]             rs2   rs1 001 imm[4:0]    0100011 S sh      M[x[rs1] + sext(imm)] = x[rs2][15:0]
-imm[11:5]             rs2   rs1 010 imm[4:0]    0100011 S sw      M[x[rs1] + sext(imm)] = x[rs2][31:0]
-  3. Set regNum = rs1
-  4. Set Bus Address = regOut + sign extend (imm), Set regNum = rs2
-  5. Set dataOut = regout & bytemask | dataIn & ~bytemask, busWriteEnable = 1
-  6. busWriteEnable = 0
-
- */
 
 endmodule

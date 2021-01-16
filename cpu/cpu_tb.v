@@ -5,6 +5,7 @@ module CPUTest;
   localparam ms = 1e6;
   localparam us = 1e3;
   localparam memorySize = 131072;
+  localparam timeoutClocks = 2000;
 
   integer i, j;
 
@@ -66,13 +67,23 @@ module CPUTest;
 
     reset = 0;
 
+    $info("Testing ADDI");
+    j = 0;
     while (address != 32'h3C) // End of ADDI
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[0]  != 32'h000) $error("Expected X%02d to be %08x but got %08x", 0,  32'h000, cpu.registers.registers[0] );
     if (cpu.registers.registers[1]  != 32'h3E8) $error("Expected X%02d to be %08x but got %08x", 1,  32'h3E8, cpu.registers.registers[1] );
@@ -91,13 +102,23 @@ module CPUTest;
     if (cpu.registers.registers[14] != 32'hBB8) $error("Expected X%02d to be %08x but got %08x", 14, 32'hBB8, cpu.registers.registers[14]);
     if (cpu.registers.registers[15] != 32'h7D0) $error("Expected X%02d to be %08x but got %08x", 15, 32'h7D0, cpu.registers.registers[15]);
 
+    $info("Testing SLTI/SLTIU");
+    j = 0;
     while (address != 32'h58) // End of slti / sltiu
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[10] != 32'h0) $error("Expected X%02d to be %08x but got %08x", 10, 32'h0, cpu.registers.registers[10]);
     if (cpu.registers.registers[11] != 32'h1) $error("Expected X%02d to be %08x but got %08x", 11, 32'h1, cpu.registers.registers[11]);
@@ -106,25 +127,45 @@ module CPUTest;
     if (cpu.registers.registers[14] != 32'h0) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0, cpu.registers.registers[14]);
     if (cpu.registers.registers[15] != 32'h1) $error("Expected X%02d to be %08x but got %08x", 15, 32'h1, cpu.registers.registers[15]);
 
+    $info("Testing XORI");
+    j = 0;
     while (address != 32'h70) // End of xori
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[13] != 32'hFFFFFF0F) $error("Expected X%02d to be %08x but got %08x", 13, 32'hFFFFFF0F, cpu.registers.registers[13]);
     if (cpu.registers.registers[14] != 32'hFFFFF8F0) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFFFFF8F0, cpu.registers.registers[14]);
     if (cpu.registers.registers[15] != 32'hFFFFF800) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFFFFF800, cpu.registers.registers[15]);
 
+    $info("Testing ORI");
+    j = 0;
     while (address != 32'h94) // End of ori
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[10] != 32'h000000F0) $error("Expected X%02d to be %08x but got %08x", 10, 32'h000000F0, cpu.registers.registers[10]);
     if (cpu.registers.registers[11] != 32'h0000070F) $error("Expected X%02d to be %08x but got %08x", 11, 32'h0000070F, cpu.registers.registers[11]);
@@ -133,13 +174,23 @@ module CPUTest;
     if (cpu.registers.registers[14] != 32'hFFFFFFFF) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFFFFFFFF, cpu.registers.registers[14]);
     if (cpu.registers.registers[15] != 32'hFFFFFFFF) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFFFFFFFF, cpu.registers.registers[15]);
 
+    $info("Testing ANDI");
+    j = 0;
     while (address != 32'hb8) // End of andi
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[10] != 32'h00000050) $error("Expected X%02d to be %08x but got %08x", 10, 32'h00000050, cpu.registers.registers[10]);
     if (cpu.registers.registers[11] != 32'h00000105) $error("Expected X%02d to be %08x but got %08x", 11, 32'h00000105, cpu.registers.registers[11]);
@@ -148,13 +199,23 @@ module CPUTest;
     if (cpu.registers.registers[14] != 32'h0000070F) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0000070F, cpu.registers.registers[14]);
     if (cpu.registers.registers[15] != 32'h000007FF) $error("Expected X%02d to be %08x but got %08x", 15, 32'h000007FF, cpu.registers.registers[15]);
 
+    $info("Testing SLLI");
+    j = 0;
     while (address != 32'hd8) // End of slli
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[9]  != 32'hFF000000) $error("Expected X%02d to be %08x but got %08x",  9, 32'h00000050, cpu.registers.registers[9] );
     if (cpu.registers.registers[10] != 32'h07FF0000) $error("Expected X%02d to be %08x but got %08x", 10, 32'h00000050, cpu.registers.registers[10]);
@@ -164,13 +225,23 @@ module CPUTest;
     if (cpu.registers.registers[14] != 32'h00000FFE) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0000070F, cpu.registers.registers[14]);
     if (cpu.registers.registers[15] != 32'h000007FF) $error("Expected X%02d to be %08x but got %08x", 15, 32'h000007FF, cpu.registers.registers[15]);
 
+    $info("Testing SRLI");
+    j = 0;
     while (address != 32'hfc) // End of srli
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[9]  != 32'h000000FF) $error("Expected X%02d to be %08x but got %08x",  9, 32'h00000050, cpu.registers.registers[9] );
     if (cpu.registers.registers[10] != 32'h0000FF00) $error("Expected X%02d to be %08x but got %08x", 10, 32'h00000050, cpu.registers.registers[10]);
@@ -180,13 +251,23 @@ module CPUTest;
     if (cpu.registers.registers[14] != 32'h7F800000) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0000070F, cpu.registers.registers[14]);
     if (cpu.registers.registers[15] != 32'hFF000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'h000007FF, cpu.registers.registers[15]);
 
+    $info("Testing SRAI");
+    j = 0;
     while (address != 32'h11c) // End of srai
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[9]  != 32'hFFFFFFFF) $error("Expected X%02d to be %08x but got %08x",  9, 32'hFFFFFFFF, cpu.registers.registers[9] );
     if (cpu.registers.registers[10] != 32'hFFFFFF00) $error("Expected X%02d to be %08x but got %08x", 10, 32'hFFFFFF00, cpu.registers.registers[10]);
@@ -196,25 +277,45 @@ module CPUTest;
     if (cpu.registers.registers[14] != 32'hFF800000) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFF800000, cpu.registers.registers[14]);
     if (cpu.registers.registers[15] != 32'hFF000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFF000000, cpu.registers.registers[15]);
 
+    $info("Testing ADD");
+    j = 0;
     while (address != 32'h12c) // End of ADD
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[13] != 32'hFF000000) $error("Expected X%02d to be %08x but got %08x", 13, 32'hFF000000, cpu.registers.registers[13]);
     if (cpu.registers.registers[14] != 32'hFEFFFFFF) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFEFFFFFF, cpu.registers.registers[14]);
     if (cpu.registers.registers[15] != 32'hFE000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFE000000, cpu.registers.registers[15]);
 
+    $info("Testing SUB");
+    j = 0;
     while (address != 32'h13c) // End of SUB
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[13] != 32'h01000000) $error("Expected X%02d to be %08x but got %08x", 13, 32'h01000000, cpu.registers.registers[13]);
     if (cpu.registers.registers[14] != 32'hFF000001) $error("Expected X%02d to be %08x but got %08x", 14, 32'hFF000001, cpu.registers.registers[14]);
@@ -244,56 +345,112 @@ module CPUTest;
     reset = 0;
 
     $info("Testing BEQ");
+    j = 0;
     while (address != 32'h34) // End of BEQ
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     $info("Testing BNE");
+    j = 0;
     while (address != 32'h4C) // End of BNE
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     $info("Testing BLT");
+    j = 0;
     while (address != 32'h7C) // End of BLT
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     $info("Testing BGE");
+    j = 0;
     while (address != 32'hB8) // End of BGE
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
+
     $info("Testing BLTU");
+    j = 0;
     while (address != 32'hD0) // End of BLTU
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
+
     $info("Testing BGEU");
+    j = 0;
     while (address != 32'hE4) // End of BGEU
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     for (i = 0; i < memorySize; i++)
     begin
@@ -317,13 +474,23 @@ module CPUTest;
 
     reset = 0;
 
+    $info("Testing LUI/AUIPC");
+    j = 0;
     while (address != 32'h24) // End of LUI / AUIPC
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[1] != 32'hFFFFF000) $error("Expected X%02d to be %08x but got %08x", 1, 32'hFFFFF000, cpu.registers.registers[1]);
     if (cpu.registers.registers[2] != 32'hFFFFF018) $error("Expected X%02d to be %08x but got %08x", 2, 32'hFFFFF018, cpu.registers.registers[2]);
@@ -350,13 +517,23 @@ module CPUTest;
 
     reset = 0;
 
+    $info("Testing JAL/JALR");
+    j = 0;
     while (address != 32'h1c) // End of JAL/JALR
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[1] != 32'h18) $error("Expected X%02d to be %08x but got %08x", 1, 32'h18, cpu.registers.registers[1]);
     if (cpu.registers.registers[2] != 32'h30) $error("Expected X%02d to be %08x but got %08x", 2, 32'h30, cpu.registers.registers[2]);
@@ -384,13 +561,23 @@ module CPUTest;
 
     reset = 0;
 
+    $info("Testing LOAD");
+    j = 0;
     while (address != 32'h2c) // End of LOAD
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[8]  != 32'h000000DE) $error("Expected X%02d to be %08x but got %08x",  8, 32'h000000DE, cpu.registers.registers[8] );
     if (cpu.registers.registers[9]  != 32'h000000AD) $error("Expected X%02d to be %08x but got %08x",  9, 32'h000000AD, cpu.registers.registers[9] );
@@ -401,13 +588,24 @@ module CPUTest;
     if (cpu.registers.registers[14] != 32'h0000BEEF) $error("Expected X%02d to be %08x but got %08x", 14, 32'h0000BEEF, cpu.registers.registers[14]);
     if (cpu.registers.registers[15] != 32'hDEADBEEF) $error("Expected X%02d to be %08x but got %08x", 15, 32'hDEADBEEF, cpu.registers.registers[15]);
 
+
+    $info("Testing LOAD Sign Extended");
+    j = 0;
     while (address != 32'h54) // End of LOAD Sign Extended
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (cpu.registers.registers[9]  != 32'hFFFFFF84) $error("Expected X%02d to be %08x but got %08x",  9, 32'hFFFFFF84, cpu.registers.registers[9] );
     if (cpu.registers.registers[10] != 32'hFFFFFF83) $error("Expected X%02d to be %08x but got %08x", 10, 32'hFFFFFF83, cpu.registers.registers[10]);
@@ -418,25 +616,45 @@ module CPUTest;
     if (cpu.registers.registers[15] != 32'hFFFF8281) $error("Expected X%02d to be %08x but got %08x", 15, 32'hFFFF8281, cpu.registers.registers[15]);
 
 
+    $info("Testing Aligned Store");
+    j = 0;
     while (address != 32'h74) // End of Aligned Store
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
     if (memory[32'h10000 >> 2] != 32'h81      ) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10000, 32'h81       ,memory[32'h10000 >> 2]);
     if (memory[32'h10004 >> 2] != 32'h8281    ) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10004, 32'h8281     ,memory[32'h10004 >> 2]);
     if (memory[32'h10008 >> 2] != 32'h84838281) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10008, 32'h84838281 ,memory[32'h10008 >> 2]);
 
+    $info("Testing Unaligned Store");
+    j = 0;
     while (address != 32'hb8) // End of Unaligned Store
     begin
       #10
       clk = 1;
       #10
       clk = 0;
+
+      j = j + 1;
+      if (j > timeoutClocks)
+      begin
+        $error("Timeout processing tests");
+        $finish;
+      end
     end
+    $info("Took %d clocks", j);
 
 
     if (memory[32'h10000 >> 2] != 32'h00000081) $error("Expected Memory 0x%08x to be %08x but got %08x",  32'h10000, 32'h00000081 ,memory[32'h10000 >> 2]);

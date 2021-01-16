@@ -9,9 +9,11 @@ module RiskowTest;
   reg                 clk;
   reg                 reset;
   wire                led;
+  wire        [5:0]   lcd;
   // wire        [31:0]  IOPortA;
   // wire        [31:0]  IOPortB;
   assign led = dut.portB.direction[0] ? 1'bZ : 1'b1;
+  assign lcd = 5'bZZZZZ;
   // generate
   //   genvar idx;
   //   for(idx = 0; idx < 32; idx = idx+1) begin: register
@@ -21,7 +23,7 @@ module RiskowTest;
   // endgenerate
 
   // Our device under test
-  top dut(clk, reset, led);
+  top dut(clk, reset, led, lcd);
 
   initial begin
     $dumpfile("top_tb.vcd");
@@ -45,7 +47,7 @@ module RiskowTest;
 
     reset = 1;
 
-    repeat(1000000)
+    repeat(10000)
     begin
       #10
       clk = 1;
