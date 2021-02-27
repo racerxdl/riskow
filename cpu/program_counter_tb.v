@@ -87,7 +87,7 @@ module ProgramCounterTest;
     writeEnable = 0;
     countEnable = 1;
 
-    for (i = 0; i < 16; i++)
+    for (i = 0; i < 16; i=i+1)
     begin
       if (dataOut != dataIn + i * 4) $error("Expected dataOut to be %d but got %d.", dataIn + i * 4, dataOut);
       // Pulse Clock

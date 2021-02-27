@@ -45,7 +45,7 @@ module CPUTest;
   initial begin
     $dumpfile("cpu_test.vcd");
     $dumpvars(0, CPUTest);
-    for (i = 0; i < memorySize; i++)
+    for (i = 0; i < memorySize; i=i+1)
     begin
       memory[i] = 32'b0;
     end
@@ -322,7 +322,7 @@ module CPUTest;
     if (cpu.registers.registers[15] != 32'h00000000) $error("Expected X%02d to be %08x but got %08x", 15, 32'h00000000, cpu.registers.registers[15]);
 
     // Test Jmps
-    for (i = 0; i < memorySize; i++)
+    for (i = 0; i < memorySize; i=i+1)
     begin
       memory[i] = 32'b0;
     end
@@ -452,7 +452,7 @@ module CPUTest;
     end
     $info("Took %d clocks", j);
 
-    for (i = 0; i < memorySize; i++)
+    for (i = 0; i < memorySize; i=i+1)
     begin
       memory[i] = 32'b0;
     end
@@ -495,7 +495,7 @@ module CPUTest;
     if (cpu.registers.registers[1] != 32'hFFFFF000) $error("Expected X%02d to be %08x but got %08x", 1, 32'hFFFFF000, cpu.registers.registers[1]);
     if (cpu.registers.registers[2] != 32'hFFFFF018) $error("Expected X%02d to be %08x but got %08x", 2, 32'hFFFFF018, cpu.registers.registers[2]);
 
-    for (i = 0; i < memorySize; i++)
+    for (i = 0; i < memorySize; i=i+1)
     begin
       memory[i] = 32'b0;
     end
@@ -539,7 +539,7 @@ module CPUTest;
     if (cpu.registers.registers[2] != 32'h30) $error("Expected X%02d to be %08x but got %08x", 2, 32'h30, cpu.registers.registers[2]);
 
 
-    for (i = 0; i < memorySize; i++)
+    for (i = 0; i < memorySize; i=i+1)
     begin
       memory[i] = 32'b0;
     end

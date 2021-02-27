@@ -25,7 +25,7 @@ module ALUTest;
 
     // Test operation ADD
     operation = dut.ADD;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -35,7 +35,7 @@ module ALUTest;
 
     // Test operation SUB
     operation = dut.SUB;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -45,7 +45,7 @@ module ALUTest;
 
     // Test operation OR
     operation = dut.OR;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -55,7 +55,7 @@ module ALUTest;
 
     // Test operation XOR
     operation = dut.XOR;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -65,7 +65,7 @@ module ALUTest;
 
     // Test operation AND
     operation = dut.AND;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -75,7 +75,7 @@ module ALUTest;
 
     // Test operation LesserThanUnsigned
     operation = dut.LesserThanUnsigned;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -85,7 +85,7 @@ module ALUTest;
 
     // Test operation LesserThanSigned
     operation = dut.LesserThanSigned;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -95,7 +95,7 @@ module ALUTest;
 
     // Test operation ShiftRightUnsigned
     operation = dut.ShiftRightUnsigned;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -105,7 +105,7 @@ module ALUTest;
 
     // Test operation ShiftLeftUnsigned
     operation = dut.ShiftLeftUnsigned;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -115,7 +115,7 @@ module ALUTest;
 
     // Test operation ShiftRightSigned
     operation = dut.ShiftRightSigned;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -125,7 +125,7 @@ module ALUTest;
 
     // Test operation ShiftLeftSigned
     operation = dut.ShiftLeftSigned;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -135,7 +135,7 @@ module ALUTest;
 
     // Test operation GreaterThanOrEqualUnsigned
     operation = dut.GreaterThanOrEqualUnsigned;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -145,7 +145,7 @@ module ALUTest;
 
     // Test operation GreaterThanOrEqualUnsigned
     operation = dut.GreaterThanOrEqualSigned;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -155,7 +155,7 @@ module ALUTest;
 
     // Test operation Equal
     operation = dut.Equal;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
@@ -165,7 +165,7 @@ module ALUTest;
 
     // Test operation NotEqual
     operation = dut.NotEqual;
-    for (i = 0; i < numIterations; i++)
+    for (i = 0; i < numIterations; i=i+1)
     begin
       X = $random;
       Y = $random;
