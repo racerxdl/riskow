@@ -112,35 +112,28 @@ begin
         // $finish;
       end
     end
-    else
-    begin
-      if      (romChipSelect)   busDataOut <= ROMFF;
-      else if (ramChipSelect)   busDataOut <= RAMFF;
-      else if (excpChipSelect)  busDataOut <= EXCPF;
-      else if (portChipSelectA) busDataOut <= portDataOutA;
-      else if (portChipSelectB) busDataOut <= portDataOutB;
-      else if (t0ChipSelect)    busDataOut <= t0DataOut;
-      else
-      begin
-        // $error("Ummapped Memory Access at 0x%08x", busAddress);
-        busDataOut <= 0;
-        // $finish;
-      end
-    end
   end
-  else
-  begin
-    busDataOut <= 0;
-  end
-end
 
-always @(negedge clk)  
-begin
   ROMFF <= ROM[busAddress[15:2]]; // ROMFF is part of BRAM
   RAMFF <= RAM[busAddress[14:2]]; // RAMFF is part of BRAM
   EXCPF <= EXCP[busAddress[9:2]-10'h1E0]; // 0x53F0DE0 offset
 end
 
+always@*
+begin
+  if      (romChipSelect)   busDataOut <= ROMFF;
+  else if (ramChipSelect)   busDataOut <= RAMFF;
+  else if (excpChipSelect)  busDataOut <= EXCPF;
+  else if (portChipSelectA) busDataOut <= portDataOutA;
+  else if (portChipSelectB) busDataOut <= portDataOutB;
+  else if (t0ChipSelect)    busDataOut <= t0DataOut;
+  else
+  begin
+    // $error("Ummapped Memory Access at 0x%08x", busAddress);
+    busDataOut <= 0;
+    // $finish;
+  end
+end
 
 // IO
 // IO ADDR = 0xF0000000 // 8 bytes, lower 4 bytes == value, upper 4 bytes = dir
