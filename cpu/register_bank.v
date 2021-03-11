@@ -10,7 +10,7 @@ module RegisterBank (
 reg [31:0] registers [0:15];
 
 initial begin
-  for ( i = 0; i < 16; i++)
+  for ( i = 0; i < 16; i=i+1)
   begin
     registers[i] = 0;
   end
@@ -22,7 +22,7 @@ always @(posedge clk)
 begin
   if (reset)
   begin
-      for (i = 0; i < 16; i++)
+      for (i = 0; i < 16; i=i+1)
       begin
         registers[i] <= 0;
       end

@@ -7,7 +7,25 @@ module top (
   // inout [31:0]  IOPortB
 );
 
-wire reset = ~rst;
+// self-reset w/ self-detect logic
+// self-reset just start w/ a value and decrement it until zero; at same time, sample the 
+// default external reset value at startup, supposing that you are not pressing the button 
+// at the programming moment! supposed to work in *any* board!
+
+reg [3:0] reset_counter = 15; // self-reset
+reg reset  = 1; // global reset
+reg extrst = 1; // external reset default value (sampled at startup)
+
+always@(posedge clk)
+begin
+    reset_counter <= reset_counter ? reset_counter-1 : // while(reset_counter--);
+                     extrst!=rst ? 13 : 0; // rst != extrst -> restart counter
+    reset <= reset_counter ? 1 : 0; // while not zero, reset = 1, after that use extrst
+    extrst <= (reset_counter==14) ? rst : extrst; // sample the reset button and store the value when not in reset
+end
+
+//wire reset = ~rst; // lattice led board
+//wire reset = rst; // avnet microboard lx9
 
 // BUS
 wire  [31:0]  busAddress;
@@ -16,7 +34,7 @@ wire  [31:0]  busDataIn;
 reg   [31:0]  busDataOut;
 
 // CPU
-reg   [31:0]  cpuDataIn;
+wire  [31:0]  cpuDataIn;
 wire  [31:0]  cpuDataOut;
 wire  [31:0]  cpuAddress;
 wire          cpuBusWriteEnable;
@@ -52,9 +70,13 @@ assign lcd = _IOPortA[5:0];
 
 
 // Memory
-reg [31:0]  ROM   [0:16383]; // 64KB
+reg [31:0]  ROM   [0:8191];  // 32KB
 reg [31:0]  RAM   [0:8191];  // 32KB
-reg [31:0]  EXCP  [0:255];   // 1KB
+reg [31:0]  EXCP  [0:15];   // 1KB
+
+reg [31:0]  ROMFF;
+reg [31:0]  RAMFF;
+reg [31:0]  EXCPF;
 
 wire romChipSelect;
 wire ramChipSelect;
@@ -90,28 +112,28 @@ begin
         // $finish;
       end
     end
-    else
-    begin
-      if      (romChipSelect)   busDataOut <= ROM[busAddress[15:2]];
-      else if (ramChipSelect)   busDataOut <= RAM[busAddress[14:2]];
-      else if (excpChipSelect)  busDataOut <= EXCP[busAddress[9:2]-10'h1E0]; // 0x53F0DE0 offset
-      else if (portChipSelectA) busDataOut <= portDataOutA;
-      else if (portChipSelectB) busDataOut <= portDataOutB;
-      else if (t0ChipSelect)    busDataOut <= t0DataOut;
-      else
-      begin
-        // $error("Ummapped Memory Access at 0x%08x", busAddress);
-        busDataOut <= 0;
-        // $finish;
-      end
-    end
   end
-  else
-  begin
-    busDataOut <= 0;
-  end
+
+  ROMFF <= ROM[busAddress[15:2]]; // ROMFF is part of BRAM
+  RAMFF <= RAM[busAddress[14:2]]; // RAMFF is part of BRAM
+  EXCPF <= EXCP[busAddress[9:2]-10'h1E0]; // 0x53F0DE0 offset
 end
 
+always@*
+begin
+  if      (romChipSelect)   busDataOut <= ROMFF;
+  else if (ramChipSelect)   busDataOut <= RAMFF;
+  else if (excpChipSelect)  busDataOut <= EXCPF;
+  else if (portChipSelectA) busDataOut <= portDataOutA;
+  else if (portChipSelectB) busDataOut <= portDataOutB;
+  else if (t0ChipSelect)    busDataOut <= t0DataOut;
+  else
+  begin
+    // $error("Ummapped Memory Access at 0x%08x", busAddress);
+    busDataOut <= 0;
+    // $finish;
+  end
+end
 
 // IO
 // IO ADDR = 0xF0000000 // 8 bytes, lower 4 bytes == value, upper 4 bytes = dir

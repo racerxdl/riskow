@@ -1,0 +1,23 @@
+# AVNET board LX9 microboard
+
+NET clk            LOC = C10 | PERIOD = 100MHz HIGH 50%;
+#NET XCLK            LOC = K15 | PERIOD = 66MHz HIGH 50%;
+#NET XCLK            LOC = V10 | PERIOD = 40MHz HIGH 50%;
+
+NET rst            LOC = V4  | PULLDOWN;
+
+#NET UART_RXD        LOC = R7;
+#NET UART_TXD        LOC = T7;
+
+#NET LED[3]          LOC = P4;
+#NET LED[2]          LOC = L6;
+#NET LED[1]          LOC = F5;
+NET led          LOC = C2;
+
+NET lcd[5]        LOC = P4; # J4-1
+NET lcd[4]        LOC = L16; # J4-1
+
+NET lcd[3]        LOC = H12; # J4-1
+NET lcd[2]        LOC = G13; # J4-2
+NET lcd[1]        LOC = E16; # J4-3
+NET lcd[0]        LOC = E18; # J4-4

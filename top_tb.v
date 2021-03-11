@@ -32,7 +32,7 @@ module RiskowTest;
     $readmemh("gcc/rom.mem", dut.ROM);
     $readmemh("gcc/excp.mem", dut.EXCP);
 
-    for (i = 0; i < 8192; i++)
+    for (i = 0; i < 8192; i=i+1)
     begin
       dut.RAM[i] = 0;
     end
