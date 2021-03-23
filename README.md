@@ -15,3 +15,4 @@
 ..."Have you mooed today?"...
 ```
 
+RISC-V Processor made in livestream at twitch: https://www.youtube.com/playlist?list=PLEP_M2UAh9q52a-w3ZUEChEoG_ROeMa88 (PT-BR)
