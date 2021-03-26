@@ -19,7 +19,9 @@ module CPUTest;
   reg   [31:0]  memory [0:memorySize-1];
 
   // Our device under test
-  CPU cpu(clk, reset, dataIn, dataOut, address, busWriteEnable);
+  CPU #(
+    .EXCEPTION_HANDLING(0)
+  ) cpu(clk, reset, dataIn, dataOut, address, busWriteEnable);
 
   always @(posedge clk)
   begin
@@ -544,7 +546,7 @@ module CPUTest;
       memory[i] = 32'b0;
     end
 
-    // Test Jmps
+    // // Test Load/Store
     $readmemh("testdata/test_loadstore.mem", memory);
 
     // Reset
