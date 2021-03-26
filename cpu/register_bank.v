@@ -22,10 +22,11 @@ always @(posedge clk)
 begin
   if (reset)
   begin
-      for (i = 0; i < 16; i=i+1)
-      begin
-        registers[i] <= 0;
-      end
+    // No need for reset registers
+    // for (i = 0; i < 16; i=i+1)
+    // begin
+    //   registers[i] <= 0;
+    // end
   end
   else if (writeEnable && regNum != 0) registers[regNum] <= dataIn;
 end

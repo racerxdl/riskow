@@ -28,21 +28,23 @@ module InstructionDecoder (
   output  reg   [31:0]   aluY
 );
 
-parameter ADD = 4'h0;
-parameter SUB = 4'h1;
-parameter OR = 4'h2;
-parameter XOR = 4'h3;
-parameter AND = 4'h4;
-parameter LesserThanUnsigned = 4'h5;
-parameter LesserThanSigned = 4'h6;
-parameter ShiftRightUnsigned = 4'h7;
-parameter ShiftRightSigned = 4'h8;
-parameter ShiftLeftUnsigned = 4'h9;
-parameter ShiftLeftSigned = 4'hA;
-parameter GreaterThanOrEqualUnsigned = 4'hB;
-parameter GreaterThanOrEqualSigned = 4'hC;
-parameter Equal = 4'hD;
-parameter NotEqual = 4'hE;
+parameter EXCEPTION_HANDLING = 0;
+
+localparam ADD = 4'h0;
+localparam SUB = 4'h1;
+localparam OR = 4'h2;
+localparam XOR = 4'h3;
+localparam AND = 4'h4;
+localparam LesserThanUnsigned = 4'h5;
+localparam LesserThanSigned = 4'h6;
+localparam ShiftRightUnsigned = 4'h7;
+localparam ShiftRightSigned = 4'h8;
+localparam ShiftLeftUnsigned = 4'h9;
+localparam ShiftLeftSigned = 4'hA;
+localparam GreaterThanOrEqualUnsigned = 4'hB;
+localparam GreaterThanOrEqualSigned = 4'hC;
+localparam Equal = 4'hD;
+localparam NotEqual = 4'hE;
 
 localparam ExceptionHandlerAddress = 32'h5E_F0DE0;
 
@@ -163,11 +165,11 @@ begin
         else // Sign Extend
           imm <= { {20{immTypeI[11]}}, immTypeI[11:0] };
       end
-      else if (inputOpcode == 7'b0100011)                          // Type S instructions
+      else if (inputOpcode == 7'b0100011)                               // Type S instructions
       begin
           imm <= { {20{immTypeS[11]}}, immTypeS[11:0] };
       end
-      else if (inputOpcode == 7'b1100011)                          // Type B instructions
+      else if (inputOpcode == 7'b1100011)                               // Type B instructions
       begin
           imm <= { {19{immTypeB[12]}}, immTypeB[12:0] };
       end
@@ -175,7 +177,7 @@ begin
       begin
           imm <= { immTypeU[19:0], 12'b0 };
       end
-      else if (inputOpcode == 7'b1101111)                          // Type J instructions
+      else if (inputOpcode == 7'b1101111)                               // Type J instructions
       begin
           imm <= { {12{immTypeJ[19]}}, immTypeJ[19:0] };
       end
@@ -345,9 +347,9 @@ begin
             end
             Execute1:
             begin
-              regWriteEnable  <= 0;         // 4.1 Set regWriteEnable = 0,
-              pcDataIn        <= aluO;      // 4.2 Set pcDataIn = ALU O,
-              pcWriteEnable   <= 1;         // 4.3 Set pcWriteEnable = 1
+              regWriteEnable  <= 0;           // 4.1 Set regWriteEnable = 0,
+              pcDataIn        <= aluO;        // 4.2 Set pcDataIn = ALU O,
+              pcWriteEnable   <= 1;           // 4.3 Set pcWriteEnable = 1
               currentState    <= Execute2;
             end
             Execute2:
@@ -362,24 +364,24 @@ begin
           case (currentState)
             Execute0:
             begin
-              regNum          <= rs1;       // 3.1 Set regNum = rs1,
-              aluX            <= imm;       // 3.4 Set ALU X = sign extend (offset)
-              aluOp           <= ADD;       // 3.6 Set ALU OP = ADD
+              regNum          <= rs1;         // 3.1 Set regNum = rs1,
+              aluX            <= imm;         // 3.4 Set ALU X = sign extend (offset)
+              aluOp           <= ADD;         // 3.6 Set ALU OP = ADD
               currentState    <= Execute1;
             end
             Execute1:
             begin
-              aluY            <= regOut;    // 4.1 Set ALU Y = regOut
-              regNum          <= rd;        // 4.2 Set regNum = rd
-              regWriteEnable  <= 1;         // 4.3 Set regWriteEnable = 1
-              regIn           <= pcDataOut; // 4.4 Set regIn = pcDataOut
+              aluY            <= regOut;      // 4.1 Set ALU Y = regOut
+              regNum          <= rd;          // 4.2 Set regNum = rd
+              regWriteEnable  <= 1;           // 4.3 Set regWriteEnable = 1
+              regIn           <= pcDataOut;   // 4.4 Set regIn = pcDataOut
               currentState    <= Execute2;
             end
             Execute2:
             begin
-              regWriteEnable  <= 0;         // 5.1 Set regWriteEnable = 0
-              pcDataIn        <= aluO & ~1; // 5.2 Set pcDataIn = ALU O & ~1,
-              pcWriteEnable   <= 1;         // 5.3 Set pcWriteEnable = 1
+              regWriteEnable  <= 0;           // 5.1 Set regWriteEnable = 0
+              pcDataIn        <= aluO & ~1;   // 5.2 Set pcDataIn = ALU O & ~1,
+              pcWriteEnable   <= 1;           // 5.3 Set pcWriteEnable = 1
               currentState    <= Execute3;
             end
             Execute3:
@@ -408,8 +410,10 @@ begin
             Execute2: // 5. Set Bus Address = alu O
             begin
               if (
-                  (inputByteOffset != 0 && numberOfBytes == 2) || // 32 bit read beyond boundary
-                  (inputByteOffset == 3 && numberOfBytes == 1)    // 16 bit read beyond boundary
+                  (EXCEPTION_HANDLING == 1) && (
+                    (inputByteOffset != 0 && numberOfBytes == 2) || // 32 bit read beyond boundary
+                    (inputByteOffset == 3 && numberOfBytes == 1)    // 16 bit read beyond boundary
+                  )
                 )
               begin
                   // Misaligned Exception
@@ -485,8 +489,10 @@ begin
             Execute2: // 5. Check Alignment, set Address = {aluO[31:2], 2'b00}
             begin
               if (
-                  (inputByteOffset != 0 && numberOfBytes == 2) || // 32 bit write beyond boundary
-                  (inputByteOffset == 3 && numberOfBytes == 1)    // 16 bit write beyond boundary
+                  (EXCEPTION_HANDLING == 1) && (
+                    (inputByteOffset != 0 && numberOfBytes == 2) || // 32 bit write beyond boundary
+                    (inputByteOffset == 3 && numberOfBytes == 1)    // 16 bit write beyond boundary
+                  )
                 )
               begin
                   // Misaligned Exception

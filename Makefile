@@ -6,7 +6,7 @@ TB_DSN        := $(TB_SOURCES:%.v=%.dsn)
 TB_DSN_RES    := $(TB_SOURCES:%.v=%.dsn.result)
 VCD_FILES     := $(shell find . -name '*.vcd')
 GENERATED_MEM := $(shell find testdata -name '*.mem')
-
+MODULES       := $(shell grep -r '^module' --include '*.v' . | awk '{ print $$2 }'  | cut -d';' -f1 |grep -v Test)
 YOSYS_SCRIPT  := syn.ys
 
 DOCKER=docker
@@ -57,6 +57,13 @@ test: testdata $(TB_DSN) $(TB_DSN_RES)
 	@for test in $<; do echo "Running test $$test"; done
 # 	echo "test $<"
 
+stat:
+	@set -e
+	@mkdir -p stats
+	@mkdir -p tmp
+	@for module in $(MODULES); do echo "Processing $$module"; $(YOSYS) -p "synth_ecp5 -top $$module; tee -a stats/$$module.txt stat" $(SOURCES) 2>&1 1>>/dev/null; done
+	@set +e
+
 artifacts: test top.svf
 	@echo "Composing artifacts"
 	@mkdir -p artifacts
@@ -66,6 +73,7 @@ $(YOSYS_SCRIPT):
 	@echo "" > $(YOSYS_SCRIPT)
 	@for file in $(SOURCES);	do echo "read_verilog $$file" >> $(YOSYS_SCRIPT); done
 	@echo "synth_ecp5 -retime -top top" >> $(YOSYS_SCRIPT)
+	@echo "tee -a fullmodule.txt stat" >> $(YOSYS_SCRIPT)
 
 top.json : $(YOSYS_SCRIPT) $(SOURCE)
 	@$(YOSYS) -s $< -o $@

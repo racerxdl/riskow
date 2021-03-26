@@ -7,6 +7,8 @@ module top (
   // inout [31:0]  IOPortB
 );
 
+parameter EXCEPTION_HANDLING = 0;
+
 // self-reset w/ self-detect logic
 // self-reset just start w/ a value and decrement it until zero; at same time, sample the 
 // default external reset value at startup, supposing that you are not pressing the button 
@@ -57,7 +59,9 @@ wire          t0ChipSelect;
 wire          t0Write;
 wire          t0WriteCommand;
 
-CPU         cpu   (clk, reset, cpuDataIn, cpuDataOut, cpuAddress, cpuBusWriteEnable);
+CPU # ( 
+  .EXCEPTION_HANDLING(EXCEPTION_HANDLING)
+) cpu (clk, reset, cpuDataIn, cpuDataOut, cpuAddress, cpuBusWriteEnable);
 DigitalPort portA (clk, reset, portChipSelectA, portWriteIO, portWriteDirection, portDataIn, portDataOutA, _IOPortA);
 DigitalPort portB (clk, reset, portChipSelectB, portWriteIO, portWriteDirection, portDataIn, portDataOutB, _IOPortB);
 Timer       t0    (clk, reset, t0ChipSelect, t0Write, t0WriteCommand, t0DataIn, t0DataOut);
@@ -72,7 +76,7 @@ assign lcd = _IOPortA[5:0];
 // Memory
 reg [31:0]  ROM   [0:8191];  // 32KB
 reg [31:0]  RAM   [0:8191];  // 32KB
-reg [31:0]  EXCP  [0:15];   // 1KB
+reg [31:0]  EXCP  [0:15];    // 1KB
 
 reg [31:0]  ROMFF;
 reg [31:0]  RAMFF;
@@ -96,7 +100,7 @@ begin
     begin
       if      (romChipSelect)   ROM[busAddress[15:2]]         <= busDataIn;
       else if (ramChipSelect)   RAM[busAddress[14:2]]         <= busDataIn;
-      else if (excpChipSelect)  EXCP[busAddress[9:2]-10'h1E0] <= busDataIn;
+      else if (excpChipSelect && EXCEPTION_HANDLING == 1)  EXCP[busAddress[9:2]-10'h1E0] <= busDataIn;
       else if (portChipSelectA || portChipSelectB)
       begin
         // if (portChipSelectA) $info("Wrote %08x on PORTA (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
@@ -116,14 +120,15 @@ begin
 
   ROMFF <= ROM[busAddress[15:2]]; // ROMFF is part of BRAM
   RAMFF <= RAM[busAddress[14:2]]; // RAMFF is part of BRAM
-  EXCPF <= EXCP[busAddress[9:2]-10'h1E0]; // 0x53F0DE0 offset
+  if (EXCEPTION_HANDLING == 1)
+    EXCPF <= EXCP[busAddress[9:2]-10'h1E0]; // 0x53F0DE0 offset
 end
 
 always@*
 begin
   if      (romChipSelect)   busDataOut <= ROMFF;
   else if (ramChipSelect)   busDataOut <= RAMFF;
-  else if (excpChipSelect)  busDataOut <= EXCPF;
+  else if (excpChipSelect && EXCEPTION_HANDLING == 1)  busDataOut <= EXCPF;
   else if (portChipSelectA) busDataOut <= portDataOutA;
   else if (portChipSelectB) busDataOut <= portDataOutB;
   else if (t0ChipSelect)    busDataOut <= t0DataOut;
@@ -152,7 +157,7 @@ assign busDataIn          = cpuDataOut;
 // Memory CS
 assign romChipSelect      = {busAddress[31:16], 16'b0} == 32'h00000000;
 assign ramChipSelect      = {busAddress[31:16], 16'b0} == 32'h00010000;
-assign excpChipSelect     = {busAddress[31:16], 16'b0} == 32'h05E00000;
+assign excpChipSelect     = {busAddress[31:16], 16'b0} == 32'h05E00000 && EXCEPTION_HANDLING == 1;
 
 // Timer 0
 // IO ADDR = 0xF1000000

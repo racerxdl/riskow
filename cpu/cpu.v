@@ -9,6 +9,8 @@ module CPU (
   output                busWriteEnable     // 1 => WRITE, 0 => READ
 );
 
+parameter EXCEPTION_HANDLING = 1;
+
 // Program Counter
 wire  [31:0]   pcDataOut;
 wire  [31:0]   pcDataIn;
@@ -32,7 +34,9 @@ wire  [31:0]  aluO;
 ALU alu(aluOp, aluX, aluY, aluO);
 
 // Instruction Decoder
-InstructionDecoder ins(
+InstructionDecoder # (
+  .EXCEPTION_HANDLING(EXCEPTION_HANDLING)
+) ins (
   // Global Control
   clk,
   reset,
