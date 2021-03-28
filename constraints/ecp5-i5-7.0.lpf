@@ -1,0 +1,15 @@
+LOCATE COMP "clk"         SITE "P3";
+LOCATE COMP "led"         SITE "U16"; // LED
+
+LOCATE COMP "lcd[0]"      SITE "D20"; // P1 - R0 - RS
+LOCATE COMP "lcd[1]"      SITE "F20"; // P1 - G0 - EN
+LOCATE COMP "lcd[2]"      SITE "B20"; // P1 - B0 - D4
+LOCATE COMP "lcd[3]"      SITE "B19"; // P1 - R1 - D5
+LOCATE COMP "lcd[4]"      SITE "B18"; // P1 - G1 - D6
+LOCATE COMP "lcd[5]"      SITE "A19"; // P1 - B1 - D7
+
+
+// input         clk,
+// input         reset,
+// inout [31:0]  IOPortA,
+// inout [31:0]  IOPortB

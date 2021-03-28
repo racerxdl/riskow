@@ -20,11 +20,29 @@ wire           pcCountEnable;
 ProgramCounter PC(clk, reset, pcDataIn, pcDataOut, pcWriteEnable, pcWriteAdd, pcCountEnable);
 
 // Register Bank
-wire  [31:0]  regIn;
-wire  [31:0]  regOut;
-wire  [3:0]   regNum;
-wire          regWriteEnable;
-RegisterBank registers(clk, reset, regIn, regOut, regNum, regWriteEnable);
+wire  [31:0]  regIn0;
+wire  [31:0]  regOut0;
+wire  [3:0]   regNum0;
+wire          regWriteEnable0;
+wire  [31:0]  regIn1;
+wire  [31:0]  regOut1;
+wire  [3:0]   regNum1;
+wire          regWriteEnable1;
+DPRegisterBank registers(
+  clk, 
+  reset,
+  // Port 0 
+  regIn0, 
+  regOut0, 
+  regNum0, 
+  regWriteEnable0, 
+
+  // Port 1
+  regIn1, 
+  regOut1, 
+  regNum1, 
+  regWriteEnable1
+);
 
 // ALU
 wire  [3:0]   aluOp;
@@ -55,10 +73,17 @@ InstructionDecoder # (
   pcDataIn,
 
   // Register Bank Control
-  regIn,
-  regOut,
-  regNum,
-  regWriteEnable,
+  // Port 0 
+  regIn0, 
+  regOut0, 
+  regNum0, 
+  regWriteEnable0, 
+
+  // Port 1
+  regIn1, 
+  regOut1, 
+  regNum1, 
+  regWriteEnable1,
 
   // ALU Control
   aluO,

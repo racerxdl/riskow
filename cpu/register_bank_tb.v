@@ -27,18 +27,16 @@ module RegisterBankTest;
     regNum = 0;
     writeEnable = 0;
 
+    for (i = 1; i < 16; i=i+1)
+    begin
+      dut.registers[i] = 0;
+    end
+
     // Pulse Clock
     #10
     clk = 1;
     #10
     clk = 0;
-
-    // Test reset
-    if (dataOut != 0) $error("Expected dataOut to be %d but got %d.", 0, dataOut);
-    for (i = 1; i < 16; i=i+1)
-    begin
-      if (dut.registers[i] != 0) $error("Expected registers[%d] to be %d but got %d.", i, 0, dut.registers[i]);
-    end
 
     for (i = 1; i < 16; i=i+1)
     begin
@@ -48,6 +46,11 @@ module RegisterBankTest;
       dataIn = 0;
       regNum = 0;
       writeEnable = 0;
+
+      for (i = 1; i < 16; i=i+1)
+      begin
+        dut.registers[i] = 0;
+      end
 
       // Pulse Clock
       #10
