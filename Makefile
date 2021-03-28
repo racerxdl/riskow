@@ -26,12 +26,14 @@ VVP  			= $(DOCKER) $(DOCKERARGS) racerxdl/icarus vvp
 # V6.1
 #LPF=constraints/ecp5-hub-5a-75b-v6.1.lpf
 # V7.0
-LPF=constraints/ecp5-hub-5a-75b-v7.0.lpf
+# LPF=constraints/ecp5-hub-5a-75b-v7.0.lpf
+# V7.0 I5
+LPF=constraints/ecp5-i5-7.0.lpf
 
-# CABGA381 on V6.1
-#PACKAGE=CABGA381
+# CABGA381 on V6.1 or i5 7.0
+PACKAGE=CABGA381
 # CABGA256 on V7.0
-PACKAGE=CABGA256
+# PACKAGE=CABGA256
 # Maybe --timing-allow-fail
 NEXTPNR_FLAGS=--25k --freq 25 --speed 6 --write top-post-route.json --lpf-allow-unconstrained
 OPENOCD_JTAG_CONFIG=openocd/ft232.cfg
