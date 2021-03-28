@@ -71,7 +71,7 @@ module RegisterBankTest;
       clk = 0;
 
       // Verify Registers Internally
-      for (j = 0; j < 16; j=j+1)
+      for (j = 1; j < 16; j=j+1)
       begin
         if (j == i)
         begin

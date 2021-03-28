@@ -6,6 +6,9 @@ module CPU (
   input         [31:0]  dataIn,
   output  wire  [31:0]  dataOut,
   output  wire  [31:0]  address,
+  output  wire          busValid,          // 1 => Start bus transaction, 0 => Don't use bus
+  output  wire          busInstr,          // 1 => Instruction, 0 => Data
+  input   wire          busReady,          // 1 => Bus is ready with data, 0 => If bus is busy
   output                busWriteEnable     // 1 => WRITE, 0 => READ
 );
 
@@ -63,6 +66,9 @@ InstructionDecoder # (
   dataIn,
   dataOut,
   address,
+  busValid,
+  busInstr,
+  busReady,
   busWriteEnable,
 
   // PC Control

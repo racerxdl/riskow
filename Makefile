@@ -86,6 +86,9 @@ top.config : top.json $(LPF)
 top.svf : top.config
 	@$(ECPPACK) --svf top.svf $< $@
 
+top.bit : top.config
+	$(ECPPACK) --bit $@ $<
+
 prog: top.svf
 	@$(OPENOCD) -f $(OPENOCD_JTAG_CONFIG) -f $(OPENOCD_DEVICE_CONFIG) -c "transport select jtag; init; svf $<; exit"
 

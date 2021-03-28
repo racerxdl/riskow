@@ -14,6 +14,9 @@ module CPUTest;
   reg   [31:0]  dataIn;
   wire  [31:0]  dataOut;
   wire  [31:0]  address;
+  wire          busValid;           // 1 => Start bus transaction, 0 => Don't use bus
+  wire          busInstr;           // 1 => Instruction, 0 => Data
+  reg           busReady = 0;       // 1 => Bus is ready with data, 0 => If bus is busy
   wire          busWriteEnable;     // 1 => WRITE, 0 => READ
 
   reg   [31:0]  memory [0:memorySize-1];
@@ -21,26 +24,34 @@ module CPUTest;
   // Our device under test
   CPU #(
     .EXCEPTION_HANDLING(0)
-  ) cpu(clk, reset, dataIn, dataOut, address, busWriteEnable);
+  ) cpu(clk, reset, dataIn, dataOut, address, busValid, busInstr, busReady, busWriteEnable);
 
   always @(posedge clk)
   begin
-    if (address[1:0] != 0) $error("unaligned memory access at %08x", address);
-    if (busWriteEnable)
+    if (!busValid)
     begin
-      //$info("Writing %08x to %08x (original %08x)", dataOut, address, memory[address[31:2]]);
-      memory[address[31:2]] <= dataOut;
-      dataIn <= dataOut;
+      busReady <= 0;
     end
     else
     begin
-      dataIn <= memory[address[31:2]];
-    end
+      if (address[1:0] != 0) $error("unaligned memory access at %08x", address);
+      if (busWriteEnable)
+      begin
+        //$info("Writing %08x to %08x (original %08x)", dataOut, address, memory[address[31:2]]);
+        memory[address[31:2]] <= dataOut;
+        dataIn <= dataOut;
+      end
+      else
+      begin
+        dataIn <= memory[address[31:2]];
+      end
+      busReady <= 1;
 
-    if (address == cpu.ins.ExceptionHandlerAddress)
-    begin
-      $error("Exception handler reached (%08x) at %08x", address, cpu.registers.registers[1]);
-      $finish;
+      if (address == cpu.ins.ExceptionHandlerAddress)
+      begin
+        $error("Exception handler reached (%08x) at %08x", address, cpu.registers.registers[1]);
+        $finish;
+      end
     end
   end
 

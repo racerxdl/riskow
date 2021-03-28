@@ -34,12 +34,18 @@ wire  [31:0]  busAddress;
 wire  [31:0]  busWriteEnable;
 wire  [31:0]  busDataIn;
 reg   [31:0]  busDataOut;
+wire          busValid;           // 1 => Start bus transaction, 0 => Don't use bus
+wire          busInstr;           // 1 => Instruction, 0 => Data
+reg           busReady;           // 1 => Bus is ready with data, 0 => If bus is busy
 
 // CPU
 wire  [31:0]  cpuDataIn;
 wire  [31:0]  cpuDataOut;
 wire  [31:0]  cpuAddress;
 wire          cpuBusWriteEnable;
+wire          cpuBusValid;
+wire          cpuBusInstr;
+wire          cpuBusReady;
 
 // PORT
 wire  [31:0]  portDataOutA;
@@ -61,7 +67,18 @@ wire          t0WriteCommand;
 
 CPU # ( 
   .EXCEPTION_HANDLING(EXCEPTION_HANDLING)
-) cpu (clk, reset, cpuDataIn, cpuDataOut, cpuAddress, cpuBusWriteEnable);
+) cpu (
+  clk, 
+  reset, 
+  cpuDataIn, 
+  cpuDataOut, 
+  cpuAddress, 
+  cpuBusValid,
+  cpuBusInstr,
+  cpuBusReady,
+  cpuBusWriteEnable
+);
+
 DigitalPort portA (clk, reset, portChipSelectA, portWriteIO, portWriteDirection, portDataIn, portDataOutA, _IOPortA);
 DigitalPort portB (clk, reset, portChipSelectB, portWriteIO, portWriteDirection, portDataIn, portDataOutB, _IOPortB);
 Timer       t0    (clk, reset, t0ChipSelect, t0Write, t0WriteCommand, t0DataIn, t0DataOut);
@@ -96,32 +113,43 @@ always @(posedge clk)
 begin
   if (!reset)
   begin
-    if (busWriteEnable)
+    if (!busValid)
     begin
-      if      (romChipSelect)   ROM[busAddress[15:2]]         <= busDataIn;
-      else if (ramChipSelect)   RAM[busAddress[14:2]]         <= busDataIn;
-      else if (excpChipSelect && EXCEPTION_HANDLING == 1)  EXCP[busAddress[9:2]-10'h1E0] <= busDataIn;
-      else if (portChipSelectA || portChipSelectB)
-      begin
-        // if (portChipSelectA) $info("Wrote %08x on PORTA (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
-        // if (portChipSelectB) $info("Wrote %08x on PORTB (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
-      end
-      else if (t0ChipSelect)
-      begin
-        // Nothing
-      end
-      else
-      begin
-        // $error("Ummapped Memory Write at 0x%08x", busAddress);
-        // $finish;
-      end
+      busReady <= 0;
     end
+    else
+    begin
+      if (busWriteEnable)
+      begin
+        if      (romChipSelect)   ROM[busAddress[15:2]]         <= busDataIn;
+        else if (ramChipSelect)   RAM[busAddress[14:2]]         <= busDataIn;
+        else if (excpChipSelect && EXCEPTION_HANDLING == 1)  EXCP[busAddress[9:2]-10'h1E0] <= busDataIn;
+        else if (portChipSelectA || portChipSelectB)
+        begin
+          // if (portChipSelectA) $info("Wrote %08x on PORTA (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
+          // if (portChipSelectB) $info("Wrote %08x on PORTB (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
+        end
+        else if (t0ChipSelect)
+        begin
+          // Nothing
+        end
+        else
+        begin
+          // $error("Ummapped Memory Write at 0x%08x", busAddress);
+          // $finish;
+        end
+      end
+      busReady <= 1;
+    end
+  end
+  else
+  begin
+    busReady <= 0;
   end
 
   ROMFF <= ROM[busAddress[15:2]]; // ROMFF is part of BRAM
   RAMFF <= RAM[busAddress[14:2]]; // RAMFF is part of BRAM
-  if (EXCEPTION_HANDLING == 1)
-    EXCPF <= EXCP[busAddress[9:2]-10'h1E0]; // 0x53F0DE0 offset
+  if (EXCEPTION_HANDLING == 1) EXCPF <= EXCP[busAddress[9:2]-10'h1E0]; // 0x53F0DE0 offset
 end
 
 always@*
@@ -153,7 +181,9 @@ assign busWriteEnable     = cpuBusWriteEnable;
 assign busAddress         = cpuAddress;
 assign cpuDataIn          = busDataOut;
 assign busDataIn          = cpuDataOut;
-
+assign busValid           = cpuBusValid;
+assign busInstr           = cpuBusInstr;
+assign cpuBusReady        = busReady;
 // Memory CS
 assign romChipSelect      = {busAddress[31:16], 16'b0} == 32'h00000000;
 assign ramChipSelect      = {busAddress[31:16], 16'b0} == 32'h00010000;

@@ -6,7 +6,10 @@ module InstructionDecoder (
   input   wire  [31:0]  dataIn,
   output  reg   [31:0]  dataOut,
   output  reg   [31:0]  address,
-  output  reg           busWriteEnable,     // 1 => WRITE, 0 => READ
+  output  reg           busValid,          // 1 => Start bus transaction, 0 => Don't use bus
+  output  reg           busInstr,          // 1 => Instruction, 0 => Data
+  input   wire          busReady,          // 1 => Bus is ready with data, 0 => If bus is busy
+  output  reg           busWriteEnable,    // 1 => WRITE, 0 => READ
 
   // PC Control
   input   wire  [31:0]  pcDataOut,
@@ -114,6 +117,8 @@ begin
     dataOut         <= 0;
     address         <= 0;
     busWriteEnable  <= 0;
+    busValid        <= 0;
+    busInstr        <= 0;
 
     // ALU
     aluX            <= 0;
@@ -144,6 +149,8 @@ begin
       pcWriteEnable   <= 0;
       pcWriteAdd      <= 0;
       address         <= pcDataOut;
+      busValid        <= 1;
+      busInstr        <= 1;
       pcCountEnable   <= 1;
       currentState    <= Fetch1;
       regWriteEnableA <= 0;
@@ -153,8 +160,13 @@ begin
     begin
       // Disable Program Counter Count
       pcCountEnable   <= 0;
-      // BUS Data should be ready in next cycle
-      currentState    <= Decode;
+
+      if (busReady) // Wait for busReady
+      begin
+        currentState    <= Decode;
+        busValid        <= 0;       // De-assert busValid
+        busInstr        <= 0;       // De-assert busInstr
+      end
     end
     else if (currentState == Decode)  //  2. READ Bus Data -> Instruction Holder, Set PC Count = 0
     begin
@@ -415,14 +427,16 @@ begin
               else
               begin
                 address       <= {aluO[31:2], 2'b00};
-                currentState  <= Execute2;
+                busInstr      <= 0;
+                busValid      <= 1;
+                if (busReady) // Wait bus
+                begin
+                  currentState  <= Execute2;
+                  busValid      <= 0;
+                end
               end
             end
-            Execute2: // 5. Set Bus Address = alu O
-            begin
-              currentState  <= Execute3;
-            end
-            Execute3: // 6. Wait bus
+            Execute2: 
             begin
               case (inputByteOffset)
                 0:
@@ -488,15 +502,17 @@ begin
               end
               else
               begin
-                address           <= {aluO[31:2], 2'b00};
-                currentState      <= Execute2;
+                address       <= {aluO[31:2], 2'b00};
+                busInstr      <= 0;
+                busValid      <= 1;
+                if (busReady) // Wait bus for ready
+                begin
+                  currentState  <= Execute2;
+                  busValid      <= 0;
+                end
               end
             end
-            Execute2: // 5. Check Alignment, set Address = {aluO[31:2], 2'b00}
-            begin
-              currentState  <= Execute3;
-            end
-            Execute3: // 6. Wait bus
+            Execute2: // 6. 
             begin
               case (inputByteOffset)    // Input Byte
                 0:
@@ -526,8 +542,17 @@ begin
                   dataOut <= {regOutB[7:0], dataIn[23:0]}; // 1 byte
                 end
               endcase
-              busWriteEnable    <= 1;
-              currentState      <= Fetch0;              
+              busWriteEnable  <= 1;
+              busValid        <= 1;
+              currentState    <= Execute3;            
+            end
+            Execute3:
+            begin
+              if (busReady) // Wait bus
+              begin
+                currentState  <= Fetch0;
+                busValid      <= 0;
+              end 
             end
           endcase
         end
