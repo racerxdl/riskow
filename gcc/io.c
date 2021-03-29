@@ -92,9 +92,9 @@ void sleep(unsigned int ms) {
   startTimer();
 
   while(countedMs <= ms) {
-    while(getTimer() <= (CPU_CLOCK / (DIVIDEBY * 1000)));
-    setTimer(0);
-    countedMs++;
+   while(getTimer() <= (CPU_CLOCK / (DIVIDEBY * 1000)));
+   setTimer(0);
+   countedMs++;
   }
   resetTimer();
 }

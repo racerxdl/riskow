@@ -63,8 +63,6 @@ localparam Execute0 = 4'h3;
 localparam Execute1 = 4'h4;
 localparam Execute2 = 4'h5;
 localparam Execute3 = 4'h6;
-// localparam Execute4 = 4'h7;
-// localparam Execute5 = 4'h8;
 
 reg   [3:0]  currentState;
 
@@ -97,18 +95,48 @@ reg   [2:0]   funct3;
 reg   [6:0]   funct7;
 reg   [31:0]  tmpInstruction; // Only used in simulation
 
+initial begin
+  // For simulation
+  rs1             = 0;
+  rs2             = 0;
+  rd              = 0;
+  imm             = 0;
+  funct3          = 0;
+  funct7          = 0;
+  tmpInstruction  = 0;
+  dataOut         = 0;
+  address         = 0;
+  busWriteEnable  = 0;
+  busValid        = 0;
+  busInstr        = 0;
+  aluX            = 0;
+  aluY            = 0;
+  aluOp           = 0;
+  pcCountEnable   = 0;
+  pcWriteEnable   = 0;
+  pcDataIn        = 0;
+  pcWriteAdd      = 0;
+  regInA          = 0;
+  regInB          = 0;
+  regNumA         = 0;
+  regNumB         = 0;
+  regWriteEnableA = 0;
+  regWriteEnableB = 0;
+  opcode          = 7'b0110011; // ALU Op (add)
+  currentState    = Execute1;
+end
+
 always @(posedge clk)
 begin
   if (reset)
   begin
     // Instruction Decoder
-    currentState    <= Fetch0;
     rs1             <= 0;
     rs2             <= 0;
     rd              <= 0;
     imm             <= 0;
 
-    opcode          <= 0;
+    // opcode          <= 0;
     funct3          <= 0;
     funct7          <= 0;
     tmpInstruction  <= 0;
@@ -140,32 +168,27 @@ begin
 
     regWriteEnableA <= 0;
     regWriteEnableB <= 0;
+
+    // Initial Instruction for Prefetch
+    // Can be anything thats NO-OP
+    opcode          <= 7'b0110011; // ALU Op (add)
+    currentState    <= Execute1;
   end
   else
   begin
     if (currentState == Fetch0)        //  1. Set Bus Address = PC, Set PC Count = 1
     begin
-      busWriteEnable  <= 0;
+      pcCountEnable   <= 0;
       pcWriteEnable   <= 0;
       pcWriteAdd      <= 0;
-      address         <= pcDataOut;
-      busValid        <= 1;
-      busInstr        <= 1;
-      pcCountEnable   <= 1;
-      currentState    <= Fetch1;
+      // busValid        <= 0;
       regWriteEnableA <= 0;
       regWriteEnableB <= 0;
-    end
-    else if (currentState == Fetch1)
-    begin
-      // Disable Program Counter Count
-      pcCountEnable   <= 0;
-
-      if (busReady) // Wait for busReady
+      if (busReady) // Wait bus
       begin
-        currentState    <= Decode;
-        busValid        <= 0;       // De-assert busValid
-        busInstr        <= 0;       // De-assert busInstr
+        busValid      <= 0;
+        busInstr      <= 0;
+        currentState  <= Decode;
       end
     end
     else if (currentState == Decode)  //  2. READ Bus Data -> Instruction Holder, Set PC Count = 0
@@ -236,6 +259,15 @@ begin
               regInB           <= aluO;
               regWriteEnableB  <= 1;
               currentState     <= Fetch0;
+              
+              // Fetch Next
+              busWriteEnable  <= 0;
+              pcWriteEnable   <= 0;
+              pcWriteAdd      <= 0;
+              address         <= pcDataOut;
+              pcCountEnable   <= 1;
+              busValid        <= 1;
+              busInstr        <= 1;
             end
           endcase
         end
@@ -266,6 +298,15 @@ begin
               regInB          <= aluO;
               regWriteEnableB <= 1;
               currentState    <= Fetch0;
+              
+              // Fetch Next
+              busWriteEnable  <= 0;
+              pcWriteEnable   <= 0;
+              pcWriteAdd      <= 0;
+              address         <= pcDataOut;
+              pcCountEnable   <= 1;
+              busValid        <= 1;
+              busInstr        <= 1;
             end
           endcase
         end
@@ -292,19 +333,37 @@ begin
             begin
               if (aluO[0])
               begin
-                pcWriteEnable <= 1;
-                pcWriteAdd    <= 1;
-                pcDataIn      <= imm;
-                currentState  <= Execute2;
+                pcWriteEnable   <= 1;
+                pcWriteAdd      <= 1;
+                pcDataIn        <= imm;
+                currentState    <= Execute2;
               end
               else
-                currentState  <= Fetch0;
+              begin
+                pcWriteEnable   <= 0;
+                pcWriteAdd      <= 0;
+                address         <= pcDataOut;
+                pcCountEnable   <= 1;
+                busWriteEnable  <= 0;
+                currentState    <= Fetch0;
+                busValid        <= 1;
+                busInstr        <= 1;
+              end
             end
-            Execute2: // 5. Read regOut store in ALU Y
+            Execute2:
             begin
-              pcWriteEnable <= 0;
-              pcWriteAdd    <= 0;
-              currentState  <= Fetch0;
+              currentState    <= Execute3;
+              pcWriteEnable   <= 0;
+              pcWriteAdd      <= 0;
+            end
+            Execute3:
+            begin
+              address         <= pcDataOut;
+              pcCountEnable   <= 1;
+              busWriteEnable  <= 0;
+              currentState    <= Fetch0;
+              busValid        <= 1;
+              busInstr        <= 1;
             end
           endcase
         end
@@ -324,6 +383,15 @@ begin
               regInB          <= aluO;
               regWriteEnableB <= 1;
               currentState    <= Fetch0;
+              
+              // Fetch Next
+              busWriteEnable  <= 0;
+              pcWriteEnable   <= 0;
+              pcWriteAdd      <= 0;
+              address         <= pcDataOut;
+              pcCountEnable   <= 1;
+              busValid        <= 1;
+              busInstr        <= 1;
             end
           endcase
         end
@@ -336,6 +404,15 @@ begin
               regNumB         <= rd;
               regWriteEnableB <= 1;
               currentState    <= Fetch0;
+              
+              // Fetch Next
+              busWriteEnable  <= 0;
+              pcWriteEnable   <= 0;
+              pcWriteAdd      <= 0;
+              address         <= pcDataOut;
+              pcCountEnable   <= 1;
+              busValid        <= 1;
+              busInstr        <= 1;
             end
           endcase
         end
@@ -355,14 +432,15 @@ begin
             Execute1:
             begin
               regWriteEnableB <= 0;           // 4.1 Set regWriteEnable = 0,
-              pcDataIn        <= aluO;        // 4.2 Set pcDataIn = ALU O,
+              pcDataIn        <= aluO + 4;    // 4.2 Set pcDataIn = ALU O,
+              address         <= aluO;
               pcWriteEnable   <= 1;           // 4.3 Set pcWriteEnable = 1
-              currentState    <= Execute2;
-            end
-            Execute2:
-            begin
-              pcWriteEnable   <= 0;
               currentState    <= Fetch0;
+              
+              busWriteEnable  <= 0;
+              pcWriteAdd      <= 0;
+              busValid        <= 1;
+              busInstr        <= 1;
             end
           endcase
         end
@@ -381,16 +459,14 @@ begin
             Execute1:
             begin
               regWriteEnableB <= 1;           // 4.3 Set regWriteEnable = 1
-              regInB          <= pcDataOut;   // 4.4 Set regIn = pcDataOut
-              currentState    <= Execute2;
-              pcDataIn        <= aluO & ~1;   // 5.2 Set pcDataIn = ALU O & ~1,
+              regInB          <= pcDataOut + 4;   // 4.4 Set regIn = pcDataOut
+              pcDataIn        <= (aluO & ~1) + 4;   // 5.2 Set pcDataIn = ALU O & ~1,
+              address         <= aluO & ~1;
               pcWriteEnable   <= 1;           // 5.3 Set pcWriteEnable = 1
-            end
-            Execute2:
-            begin
-              regWriteEnableB <= 0;           // 5.1 Set regWriteEnable = 0
-              pcWriteEnable   <= 0;
+              busWriteEnable  <= 0;
+              busValid        <= 1;
               currentState    <= Fetch0;
+              busInstr        <= 1;
             end
           endcase
         end
@@ -418,22 +494,30 @@ begin
                   // Misaligned Exception
                   // TODO: Better diagnostics
                   currentState    <= Fetch0;
-                  pcDataIn        <= ExceptionHandlerAddress;
+                  pcDataIn        <= ExceptionHandlerAddress + 4;
                   regNumA         <= 1;
                   regInA          <= pcDataOut - 4;
                   regWriteEnableA <= 1;
                   pcWriteEnable   <= 1;
+
+                  // Fetch Next
+                  busWriteEnable  <= 0;
+                  pcWriteAdd      <= 0;
+                  address         <= ExceptionHandlerAddress;
+                  busValid        <= 1;
+                  busInstr        <= 1;
               end
               else
               begin
                 address       <= {aluO[31:2], 2'b00};
                 busInstr      <= 0;
                 busValid      <= 1;
-                if (busReady) // Wait bus
+
+                if (busReady && busValid) // Wait bus
                 begin
                   currentState  <= Execute2;
                   busValid      <= 0;
-                end
+                end   
               end
             end
             Execute2: 
@@ -468,6 +552,14 @@ begin
               endcase
               regWriteEnableB  <= 1;
               currentState     <= Fetch0;
+              // Fetch Next
+              busWriteEnable  <= 0;
+              pcWriteEnable   <= 0;
+              pcWriteAdd      <= 0;
+              address         <= pcDataOut;
+              pcCountEnable   <= 1;
+              busValid        <= 1;
+              busInstr        <= 1;
             end
           endcase
         end
@@ -494,18 +586,25 @@ begin
                   // Misaligned Exception
                   // TODO: Better diagnostics
                   currentState    <= Fetch0;
-                  pcDataIn        <= ExceptionHandlerAddress;
+                  pcDataIn        <= ExceptionHandlerAddress + 4;
                   regNumA         <= 1;
                   regInA          <= pcDataOut - 4;
                   regWriteEnableA <= 1;
                   pcWriteEnable   <= 1;
+
+                  // Fetch Next
+                  busWriteEnable  <= 0;
+                  pcWriteAdd      <= 0;
+                  address         <= ExceptionHandlerAddress;
+                  busValid        <= 1;
+                  busInstr        <= 1;
               end
               else
               begin
                 address       <= {aluO[31:2], 2'b00};
                 busInstr      <= 0;
                 busValid      <= 1;
-                if (busReady) // Wait bus for ready
+                if (busValid && busReady) // Wait bus for ready
                 begin
                   currentState  <= Execute2;
                   busValid      <= 0;
@@ -544,15 +643,24 @@ begin
               endcase
               busWriteEnable  <= 1;
               busValid        <= 1;
-              currentState    <= Execute3;            
+              if (busReady && busValid) // Wait bus
+              begin
+                currentState  <= Execute3;
+                busValid      <= 0;
+              end            
             end
             Execute3:
             begin
-              if (busReady) // Wait bus
-              begin
-                currentState  <= Fetch0;
-                busValid      <= 0;
-              end 
+              currentState    <= Fetch0;
+              
+              // Fetch Next
+              busWriteEnable  <= 0;
+              pcWriteEnable   <= 0;
+              pcWriteAdd      <= 0;
+              address         <= pcDataOut;
+              pcCountEnable   <= 1;
+              busValid        <= 1;
+              busInstr        <= 1;
             end
           endcase
         end

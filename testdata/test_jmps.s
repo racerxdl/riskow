@@ -106,3 +106,7 @@ lbl8:
 
 lbl9:
   nop
+  nop
+  nop
+  nop
+  nop

@@ -68,6 +68,9 @@ testunalignedstore:
   sh x12, 21(x1)             /* data2[5] = 0x00828100 */
   sh x12, 26(x1)             /* data2[6] = 0x82810000 */
   nop
+  nop
+  nop
+  nop
 
 
 .align 4

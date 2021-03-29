@@ -12,3 +12,5 @@ _boot:
   nop
   nop
   nop
+  nop
+  nop

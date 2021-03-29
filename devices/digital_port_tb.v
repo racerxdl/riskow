@@ -13,6 +13,7 @@ module DigitalPortTest;
   reg                 writeDirection;
   reg         [31:0]  dataIn;
   wire        [31:0]  dataOut;
+  wire        [31:0]  directionOut;
   wire        [31:0]  IO_OUT;
   wire        [31:0]  IO_IN;
 
@@ -20,8 +21,8 @@ module DigitalPortTest;
 
 
   // Our device under test
-  DigitalPort dutIn(clk, reset, chipSelect, writeIO, writeDirection, dataIn, dataOut, IO_IN);
-  DigitalPort dutOut(clk, reset, chipSelect, writeIO, writeDirection, dataIn, dataOut, IO_OUT);
+  DigitalPort dutIn(clk, reset, chipSelect, writeIO, writeDirection, dataIn, dataOut, directionOut, IO_IN);
+  DigitalPort dutOut(clk, reset, chipSelect, writeIO, writeDirection, dataIn, dataOut, directionOut, IO_OUT);
 
   initial begin
     $dumpfile("digital_port_tb.vcd");

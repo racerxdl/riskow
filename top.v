@@ -10,8 +10,8 @@ module top (
 parameter EXCEPTION_HANDLING = 0;
 
 // self-reset w/ self-detect logic
-// self-reset just start w/ a value and decrement it until zero; at same time, sample the 
-// default external reset value at startup, supposing that you are not pressing the button 
+// self-reset just start w/ a value and decrement it until zero; at same time, sample the
+// default external reset value at startup, supposing that you are not pressing the button
 // at the programming moment! supposed to work in *any* board!
 
 reg [3:0] reset_counter = 15; // self-reset
@@ -33,10 +33,10 @@ end
 wire  [31:0]  busAddress;
 wire  [31:0]  busWriteEnable;
 wire  [31:0]  busDataIn;
-reg   [31:0]  busDataOut;
+reg   [31:0]  busDataOut = 0;
 wire          busValid;           // 1 => Start bus transaction, 0 => Don't use bus
 wire          busInstr;           // 1 => Instruction, 0 => Data
-reg           busReady;           // 1 => Bus is ready with data, 0 => If bus is busy
+reg           busReady = 0;       // 1 => Bus is ready with data, 0 => If bus is busy
 
 // CPU
 wire  [31:0]  cpuDataIn;
@@ -55,6 +55,8 @@ wire          portChipSelectA;
 wire          portChipSelectB;
 wire          portWriteIO;
 wire          portWriteDirection;
+wire  [31:0]  portDirectionA;
+wire  [31:0]  portDirectionB;
 wire  [31:0]  _IOPortA;
 wire  [31:0]  _IOPortB;
 
@@ -65,22 +67,22 @@ wire          t0ChipSelect;
 wire          t0Write;
 wire          t0WriteCommand;
 
-CPU # ( 
+CPU # (
   .EXCEPTION_HANDLING(EXCEPTION_HANDLING)
 ) cpu (
-  clk, 
-  reset, 
-  cpuDataIn, 
-  cpuDataOut, 
-  cpuAddress, 
+  clk,
+  reset,
+  cpuDataIn,
+  cpuDataOut,
+  cpuAddress,
   cpuBusValid,
   cpuBusInstr,
   cpuBusReady,
   cpuBusWriteEnable
 );
 
-DigitalPort portA (clk, reset, portChipSelectA, portWriteIO, portWriteDirection, portDataIn, portDataOutA, _IOPortA);
-DigitalPort portB (clk, reset, portChipSelectB, portWriteIO, portWriteDirection, portDataIn, portDataOutB, _IOPortB);
+DigitalPort portA (clk, reset, portChipSelectA, portWriteIO, portWriteDirection, portDataIn, portDataOutA, portDirectionA, _IOPortA);
+DigitalPort portB (clk, reset, portChipSelectB, portWriteIO, portWriteDirection, portDataIn, portDataOutB, portDirectionB, _IOPortB);
 Timer       t0    (clk, reset, t0ChipSelect, t0Write, t0WriteCommand, t0DataIn, t0DataOut);
 
 assign led = _IOPortB[0];
@@ -126,8 +128,10 @@ begin
         else if (excpChipSelect && EXCEPTION_HANDLING == 1)  EXCP[busAddress[9:2]-10'h1E0] <= busDataIn;
         else if (portChipSelectA || portChipSelectB)
         begin
-          // if (portChipSelectA) $info("Wrote %08x on PORTA (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
-          // if (portChipSelectB) $info("Wrote %08x on PORTB (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
+          `ifdef SIMULATION
+          if (portChipSelectA) $info("Wrote %08x on PORTA (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
+          if (portChipSelectB) $info("Wrote %08x on PORTB (IO=%01d, DIR=%01d, PC=%08x)", busDataIn, portWriteIO, portWriteDirection, cpu.PC.programCounter);
+          `endif
         end
         else if (t0ChipSelect)
         begin
@@ -135,8 +139,10 @@ begin
         end
         else
         begin
-          // $error("Ummapped Memory Write at 0x%08x", busAddress);
-          // $finish;
+          `ifdef SIMULATION
+          $error("Ummapped Memory Write at 0x%08x", busAddress);
+          $finish;
+          `endif
         end
       end
       busReady <= 1;
@@ -147,31 +153,43 @@ begin
     busReady <= 0;
   end
 
+  `ifdef SIMULATION
+  if (busInstr && busValid)
+  begin
+    $info("Reading at PC %08x", busAddress);
+    // ROM[busAddress[15:2]]
+  end
+  `endif
   ROMFF <= ROM[busAddress[15:2]]; // ROMFF is part of BRAM
   RAMFF <= RAM[busAddress[14:2]]; // RAMFF is part of BRAM
   if (EXCEPTION_HANDLING == 1) EXCPF <= EXCP[busAddress[9:2]-10'h1E0]; // 0x53F0DE0 offset
 end
 
-always@*
+always @(*)
 begin
   if      (romChipSelect)   busDataOut <= ROMFF;
   else if (ramChipSelect)   busDataOut <= RAMFF;
   else if (excpChipSelect && EXCEPTION_HANDLING == 1)  busDataOut <= EXCPF;
-  else if (portChipSelectA) busDataOut <= portDataOutA;
-  else if (portChipSelectB) busDataOut <= portDataOutB;
+  else if (portChipSelectA) busDataOut <= portDirection ? portDirectionA : portDataOutA;
+  else if (portChipSelectB) busDataOut <= portDirection ? portDirectionB : portDataOutB;
   else if (t0ChipSelect)    busDataOut <= t0DataOut;
   else
   begin
-    // $error("Ummapped Memory Access at 0x%08x", busAddress);
     busDataOut <= 0;
-    // $finish;
+    `ifdef SIMULATION
+    $error("Ummapped Memory Access at 0x%08x", busAddress);
+    $finish;
+    `endif
   end
 end
 
 // IO
 // IO ADDR = 0xF0000000 // 8 bytes, lower 4 bytes == value, upper 4 bytes = dir
-assign portWriteIO        = busAddress[2:0]   == 3'b000 && busWriteEnable;
-assign portWriteDirection = busAddress[2:0]   == 3'b100 && busWriteEnable;
+assign portIO             = busAddress[2:0]   == 3'b000;
+assign portDirection      = busAddress[2:0]   == 3'b100;
+
+assign portWriteIO        = portIO && busWriteEnable;
+assign portWriteDirection = portDirection && busWriteEnable;
 assign portChipSelectA    = {busAddress[31:3], 3'b000} == 32'hF0000000;
 assign portChipSelectB    = {busAddress[31:3], 3'b000} == 32'hF0000008;
 assign portDataIn         = busDataIn;

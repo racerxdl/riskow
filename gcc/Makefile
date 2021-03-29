@@ -3,7 +3,7 @@ SOURCES       := $(shell find . -name '*.c')
 OBJECTS       := $(SOURCES:%.c=%.o)
 ASM_OBJECTS   := $(ASM_SOURCES:%.s=%.s.o)
 
-CFLAGS=-mabi=ilp32e -march=rv32e -O2
+CFLAGS=-mabi=ilp32e -march=rv32e
 LDFLAGS=-T riskow.ld -m elf32lriscv -O binary
 
 OC=riscv64-linux-gnu-objcopy

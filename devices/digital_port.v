@@ -6,6 +6,7 @@ module DigitalPort (
   input                 writeDirection,
   input         [31:0]  dataIn,
   output        [31:0]  dataOut,
+  output        [31:0]  directionOut,
 
   inout         [31:0]  IO                // Connected to FPGA pins
 );
@@ -30,10 +31,15 @@ end
 generate
   genvar idx;
   for(idx = 0; idx < 32; idx = idx+1) begin: register
+    `ifdef SIMULATION
+    assign IO[idx] = direction[idx] ? value[idx] : 1'b0;
+    `else
     assign IO[idx] = direction[idx] ? value[idx] : 1'bZ;
+    `endif
   end
 endgenerate
 
 assign dataOut = IO;
+assign directionOut = direction;
 
 endmodule

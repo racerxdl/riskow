@@ -47,9 +47,9 @@ module RegisterBankTest;
       regNum = 0;
       writeEnable = 0;
 
-      for (i = 1; i < 16; i=i+1)
+      for (j = 1; j < 16; j=j+1)
       begin
-        dut.registers[i] = 0;
+        dut.registers[j] = 0;
       end
 
       // Pulse Clock

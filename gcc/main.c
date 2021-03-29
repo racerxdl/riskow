@@ -20,6 +20,10 @@ int main() {
   sendData('r');
   sendData('l');
   sendData('d');
+  sendData(' ');
+  sendData('[');
+  sendData('2');
+  sendData(']');
 
   while(1) {
     for(int i = 0; i < 64; i++) {

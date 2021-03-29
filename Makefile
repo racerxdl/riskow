@@ -53,7 +53,7 @@ testdata:
 
 %.dsn: %.v
 	@echo "Generating $< -> $@"
-	@$(IVERILOG) -g2012 -o $@ $< $(SOURCES)
+	@$(IVERILOG) -DSIMULATION -g2012 -o $@ $< $(SOURCES)
 
 test: testdata $(TB_DSN) $(TB_DSN_RES)
 	@for test in $<; do echo "Running test $$test"; done

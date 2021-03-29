@@ -32,18 +32,18 @@ wire  [31:0]  regOut1;
 wire  [3:0]   regNum1;
 wire          regWriteEnable1;
 DPRegisterBank registers(
-  clk, 
+  clk,
   reset,
-  // Port 0 
-  regIn0, 
-  regOut0, 
-  regNum0, 
-  regWriteEnable0, 
+  // Port 0
+  regIn0,
+  regOut0,
+  regNum0,
+  regWriteEnable0,
 
   // Port 1
-  regIn1, 
-  regOut1, 
-  regNum1, 
+  regIn1,
+  regOut1,
+  regNum1,
   regWriteEnable1
 );
 
@@ -79,16 +79,16 @@ InstructionDecoder # (
   pcDataIn,
 
   // Register Bank Control
-  // Port 0 
-  regIn0, 
-  regOut0, 
-  regNum0, 
-  regWriteEnable0, 
+  // Port 0
+  regIn0,
+  regOut0,
+  regNum0,
+  regWriteEnable0,
 
   // Port 1
-  regIn1, 
-  regOut1, 
-  regNum1, 
+  regIn1,
+  regOut1,
+  regNum1,
   regWriteEnable1,
 
   // ALU Control

@@ -47,7 +47,7 @@ module RiskowTest;
 
     reset = 1;
 
-    repeat(10000)
+    repeat(100000)
     begin
       #10
       clk = 1;

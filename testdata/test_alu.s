@@ -107,3 +107,8 @@ _boot:                  /* x0  = 0    0x000 */
   sub  x15, x1, x1      /* x15 = 0x00000000 */
   sub  x14, x1, x9      /* x14 = 0xFF000001 */
   sub  x13, x0, x1      /* x13 = 0x01000000 */
+
+  /* NOPs */
+  nop
+  nop
+  nop
