@@ -1,10 +1,19 @@
 module RegisterBank (
   input   wire          clk,
   input   wire          reset,
-  input         [31:0]  dataIn,
-  output  wire  [31:0]  dataOut,
-  input         [3:0]   regNum,
-  input                 writeEnable     // 1 => WRITE, 0 => READ
+
+  // Port 0
+  output  wire  [31:0]  dataOut0,
+  input         [3:0]   regNum0,
+
+  // Port 1
+  output  wire  [31:0]  dataOut1,
+  input         [3:0]   regNum1,
+
+  // Write Port
+  input         [31:0]  wDataIn,
+  input         [3:0]   wRegNum,
+  input                 writeEnable     // 1 => WRITE
 );
 
 reg [31:0] registers [0:15];
@@ -20,18 +29,14 @@ integer i;
 
 always @(posedge clk)
 begin
-  if (reset)
+  if (!reset)
   begin
-    // No need for reset registers
-    // for (i = 0; i < 16; i=i+1)
-    // begin
-    //   registers[i] <= 0;
-    // end
+   if (writeEnable && wRegNum != 0) registers[wRegNum] <= wDataIn;
   end
-  else if (writeEnable && regNum != 0) registers[regNum] <= dataIn;
 end
 
-assign dataOut = registers[regNum];
+assign dataOut0 = registers[regNum0];
+assign dataOut1 = registers[regNum1];
 
 // Only for simulation expose the registers
 generate

@@ -23,28 +23,31 @@ wire           pcCountEnable;
 ProgramCounter PC(clk, reset, pcDataIn, pcDataOut, pcWriteEnable, pcWriteAdd, pcCountEnable);
 
 // Register Bank
-wire  [31:0]  regIn0;
 wire  [31:0]  regOut0;
 wire  [3:0]   regNum0;
-wire          regWriteEnable0;
-wire  [31:0]  regIn1;
+
 wire  [31:0]  regOut1;
 wire  [3:0]   regNum1;
-wire          regWriteEnable1;
-DPRegisterBank registers(
-  clk,
-  reset,
+
+wire  [31:0]  wDataIn;
+wire  [3:0]   wRegNum;
+wire          writeEnable;
+
+RegisterBank registers(
+  .clk(clk),
+  .reset(reset),
   // Port 0
-  regIn0,
-  regOut0,
-  regNum0,
-  regWriteEnable0,
+  .dataOut0(regOut0),
+  .regNum0(regNum0),
 
   // Port 1
-  regIn1,
-  regOut1,
-  regNum1,
-  regWriteEnable1
+  .dataOut1(regOut1),
+  .regNum1(regNum1),
+
+  // Write Port
+  .wDataIn(wDataIn),
+  .wRegNum(wRegNum),
+  .writeEnable(writeEnable)
 );
 
 // ALU
@@ -59,43 +62,44 @@ InstructionDecoder # (
   .EXCEPTION_HANDLING(EXCEPTION_HANDLING)
 ) ins (
   // Global Control
-  clk,
-  reset,
+  .clk(clk),
+  .reset(reset),
 
   // BUS
-  dataIn,
-  dataOut,
-  address,
-  busValid,
-  busInstr,
-  busReady,
-  busWriteEnable,
+  .dataIn(dataIn),
+  .dataOut(dataOut),
+  .address(address),
+  .busValid(busValid),
+  .busInstr(busInstr),
+  .busReady(busReady),
+  .busWriteEnable(busWriteEnable),
 
   // PC Control
-  pcDataOut,
-  pcWriteEnable,
-  pcWriteAdd,
-  pcCountEnable,
-  pcDataIn,
+  .pcDataOut(pcDataOut),
+  .pcWriteEnable(pcWriteEnable),
+  .pcWriteAdd(pcWriteAdd),
+  .pcCountEnable(pcCountEnable),
+  .pcDataIn(pcDataIn),
 
   // Register Bank Control
   // Port 0
-  regIn0,
-  regOut0,
-  regNum0,
-  regWriteEnable0,
+  .regOutA(regOut0),
+  .regNumA(regNum0),
 
   // Port 1
-  regIn1,
-  regOut1,
-  regNum1,
-  regWriteEnable1,
+  .regOutB(regOut1),
+  .regNumB(regNum1),
+
+  // Write Port
+  .wRegDataIn(wDataIn),
+  .wRegRegNum(wRegNum),
+  .wRegWriteEnable(writeEnable),
 
   // ALU Control
-  aluO,
-  aluOp,
-  aluX,
-  aluY
+  .aluO(aluO),
+  .aluOp(aluOp),
+  .aluX(aluX),
+  .aluY(aluY)
 );
 
 endmodule

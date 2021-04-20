@@ -9,13 +9,16 @@ module RegisterBankTest;
 
   reg           clk = 0;
   reg           reset = 0;
-  reg   [31:0]  dataIn;
-  wire  [31:0]  dataOut;
-  reg   [3:0]   regNum;
+  wire  [31:0]  dataOut0;
+  wire  [31:0]  dataOut1;
+  reg   [3:0]   regNum0;
+  reg   [3:0]   regNum1;
+  reg   [3:0]   wRegNum;
+  reg   [31:0]  wDataIn;
   reg           writeEnable;     // 1 => WRITE, 0 => READ
 
   // Our device under test
-  RegisterBank dut(clk, reset, dataIn, dataOut, regNum, writeEnable);
+  RegisterBank dut(clk, reset, dataOut0, regNum0, dataOut1, regNum1, wDataIn, wRegNum, writeEnable);
 
   initial begin
     $dumpfile("register_bank_tb.vcd");
@@ -23,8 +26,10 @@ module RegisterBankTest;
     // Set Reset conditions
     clk = 0;
     reset = 1;
-    dataIn = 0;
-    regNum = 0;
+    wRegNum = 0;
+    wDataIn = 0;
+    regNum0 = 0;
+    regNum1 = 0;
     writeEnable = 0;
 
     for (i = 1; i < 16; i=i+1)
@@ -43,8 +48,8 @@ module RegisterBankTest;
       // Reset
       clk = 0;
       reset = 1;
-      dataIn = 0;
-      regNum = 0;
+      wDataIn = 0;
+      wRegNum = 0;
       writeEnable = 0;
 
       for (j = 1; j < 16; j=j+1)
@@ -59,9 +64,11 @@ module RegisterBankTest;
       clk = 0;
 
       // Set Register Value
-      dataIn = 32'hFFFFFFFF;
+      wDataIn = 32'hFFFFFFFF;
       reset = 0;
-      regNum = i;
+      wRegNum = i;
+      regNum0 = i;
+      regNum1 = i;
       writeEnable = 1;
 
       // Pulse Clock
@@ -85,7 +92,7 @@ module RegisterBankTest;
 
       // Test Read Only
       writeEnable = 0;
-      dataIn = 32'hF0F0F0F0;
+      wDataIn = 32'hF0F0F0F0;
 
       // Pulse Clock
       #10
@@ -93,8 +100,8 @@ module RegisterBankTest;
       #10
       clk = 0;
 
-      if (dataOut != 32'hFFFFFFFF)
-        $error("Expected dataOut to be %d but got %d.", 32'hFFFFFFFF, dataOut);
+      if (dataOut0 != 32'hFFFFFFFF)
+        $error("Expected dataOut0 to be %d but got %d.", 32'hFFFFFFFF, dataOut0);
       if (dut.registers[i] != 32'hFFFFFFFF)
         $error("Expected registers[%d] to be %d but got %d.", 32'hFFFFFFFF, i, dut.registers[i]);
     end

@@ -3,8 +3,6 @@ module top (
   input         rst,
   inout         led,
   inout [5:0]   lcd
-  // inout [31:0]  IOPortA,
-  // inout [31:0]  IOPortB
 );
 
 parameter EXCEPTION_HANDLING = 0;
@@ -25,9 +23,6 @@ begin
     reset <= reset_counter ? 1 : 0; // while not zero, reset = 1, after that use extrst
     extrst <= (reset_counter==14) ? rst : extrst; // sample the reset button and store the value when not in reset
 end
-
-//wire reset = ~rst; // lattice led board
-//wire reset = rst; // avnet microboard lx9
 
 // BUS
 wire  [31:0]  busAddress;
@@ -108,7 +103,7 @@ wire excpChipSelect;
 
 initial begin
     $readmemh("gcc/rom.mem", ROM);
-    $readmemh("gcc/excp.mem", EXCP);
+    if (EXCEPTION_HANDLING == 1)  $readmemh("gcc/excp.mem", EXCP);
 end
 
 always @(posedge clk)

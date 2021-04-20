@@ -14,3 +14,13 @@ top.svf
 top.bit
 fullmodule.txt
 stats
+build/
+fusesoc.conf
+*.vim
+*.elf
+*.o
+*.d
+*.bin
+*.a
+*.so
+__pycache__
