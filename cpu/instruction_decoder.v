@@ -162,12 +162,13 @@ begin
     regNumA         <= 0;
     regNumB         <= 0;
 
-    wRegDataIn      <= 0;
+    //wRegDataIn      <= 0;
     wRegRegNum      <= 0;
     wRegWriteEnable <= 0;
 
     // Initial Instruction for Prefetch
-    // Can be anything thats NO-OP
+    // Can be anything thats NO-OP due init regNumA = x0, regNumB = x0, wRegRegNum = x0
+	 // then it will do add x0, x0, x0
     opcode          <= 7'b0110011; // ALU Op (add)
     currentState    <= Execute1;
   end
@@ -196,9 +197,9 @@ begin
       rd              <= inputRd;
       rs1             <= inputRs1;
       rs2             <= inputRs2;
-      regNumA         <= inputRs1;
-      regNumB         <= inputRs2;
-      wRegRegNum      <= inputRd;
+      regNumA         <= inputRs1[3:0];
+      regNumB         <= inputRs2[3:0];
+      wRegRegNum      <= inputRd[3:0];
 
       // Decode IMM where relevant
       if (inputOpcode == 7'b0010011 || inputOpcode == 7'b1100111 || inputOpcode == 7'b0000011)       // Type I instructions
@@ -243,7 +244,7 @@ begin
                 6: aluOp      <= OR;
                 7: aluOp      <= AND;
               endcase
-              aluY            <= funct3 == 5 ? {27'b0, imm[4:0]} : imm;
+              aluY            <= imm;
               aluX            <= regOutA;
               currentState    <= Execute1;
             end
@@ -254,9 +255,9 @@ begin
               currentState      <= Fetch0;
 
               // Fetch Next
-              busWriteEnable  <= 0;
-              pcWriteEnable   <= 0;
-              pcWriteAdd      <= 0;
+              //busWriteEnable  <= 0;
+              //pcWriteEnable   <= 0;
+              //pcWriteAdd      <= 0;
               address         <= pcDataOut;
               pcCountEnable   <= 1;
               busValid        <= 1;
@@ -290,9 +291,9 @@ begin
               currentState      <= Fetch0;
 
               // Fetch Next
-              busWriteEnable  <= 0;
-              pcWriteEnable   <= 0;
-              pcWriteAdd      <= 0;
+              //busWriteEnable  <= 0;
+              //pcWriteEnable   <= 0;
+              //pcWriteAdd      <= 0;
               address         <= pcDataOut;
               pcCountEnable   <= 1;
               busValid        <= 1;
@@ -328,8 +329,8 @@ begin
               end
               else
               begin
-                pcWriteEnable   <= 0;
-                pcWriteAdd      <= 0;
+                //pcWriteEnable   <= 0;
+                //pcWriteAdd      <= 0;
                 address         <= pcDataOut;
                 pcCountEnable   <= 1;
                 busWriteEnable  <= 0;
@@ -372,9 +373,9 @@ begin
               currentState    <= Fetch0;
 
               // Fetch Next
-              busWriteEnable  <= 0;
-              pcWriteEnable   <= 0;
-              pcWriteAdd      <= 0;
+              //busWriteEnable  <= 0;
+              //pcWriteEnable   <= 0;
+              //pcWriteAdd      <= 0;
               address         <= pcDataOut;
               pcCountEnable   <= 1;
               busValid        <= 1;
@@ -392,9 +393,9 @@ begin
               currentState    <= Fetch0;
 
               // Fetch Next
-              busWriteEnable  <= 0;
-              pcWriteEnable   <= 0;
-              pcWriteAdd      <= 0;
+              //busWriteEnable  <= 0;
+              //pcWriteEnable   <= 0;
+              //pcWriteAdd      <= 0;
               address         <= pcDataOut;
               pcCountEnable   <= 1;
               busValid        <= 1;
@@ -409,7 +410,7 @@ begin
             begin
               wRegDataIn      <= pcDataOut;
               wRegWriteEnable <= 1;
-              aluX            <= pcDataOut-4; // 3.4 Set ALU X = pcDataOut
+              aluX            <= pcDataOut;   // 3.4 Set ALU X = pcDataOut
               aluY            <= imm;         // 3.5 Set ALU Y = sign extend (offset)
               aluOp           <= ADD;         // 3.6 Set ALU OP = ADD
               currentState    <= Execute1;
@@ -417,13 +418,13 @@ begin
             Execute1:
             begin
               wRegWriteEnable <= 0;           // 4.1 Set regWriteEnable = 0,
-              pcDataIn        <= aluO + 4;    // 4.2 Set pcDataIn = ALU O,
-              address         <= aluO;
+              pcDataIn        <= aluO;        // 4.2 Set pcDataIn = ALU O,
+              address         <= aluO - 4;
               pcWriteEnable   <= 1;           // 4.3 Set pcWriteEnable = 1
               currentState    <= Fetch0;
 
-              busWriteEnable  <= 0;
-              pcWriteAdd      <= 0;
+              //busWriteEnable  <= 0;
+              //pcWriteAdd      <= 0;
               busValid        <= 1;
               busInstr        <= 1;
             end
@@ -443,10 +444,10 @@ begin
             begin
               wRegDataIn      <= pcDataOut + 4;
               wRegWriteEnable <= 1;
-              pcDataIn        <= (aluO & ~1) + 4;   // 5.2 Set pcDataIn = ALU O & ~1,
-              address         <= aluO & ~1;
+              pcDataIn        <= {aluO[31:1], 1'b0} + 4;   // 5.2 Set pcDataIn = ALU O & ~1,
+              address         <= {aluO[31:1], 1'b0};
               pcWriteEnable   <= 1;           // 5.3 Set pcWriteEnable = 1
-              busWriteEnable  <= 0;
+              //busWriteEnable  <= 0;
               busValid        <= 1;
               currentState    <= Fetch0;
               busInstr        <= 1;
@@ -483,8 +484,8 @@ begin
                   pcWriteEnable   <= 1;
 
                   // Fetch Next
-                  busWriteEnable  <= 0;
-                  pcWriteAdd      <= 0;
+                  //busWriteEnable  <= 0;
+                  //pcWriteAdd      <= 0;
                   address         <= ExceptionHandlerAddress;
                   busValid        <= 1;
                   busInstr        <= 1;
@@ -535,9 +536,9 @@ begin
               wRegWriteEnable  <= 1;
               currentState     <= Fetch0;
               // Fetch Next
-              busWriteEnable  <= 0;
-              pcWriteEnable   <= 0;
-              pcWriteAdd      <= 0;
+              //busWriteEnable  <= 0;
+              //pcWriteEnable   <= 0;
+              //pcWriteAdd      <= 0;
               address         <= pcDataOut;
               pcCountEnable   <= 1;
               busValid        <= 1;
@@ -574,8 +575,8 @@ begin
                   pcWriteEnable   <= 1;
 
                   // Fetch Next
-                  busWriteEnable  <= 0;
-                  pcWriteAdd      <= 0;
+                  //busWriteEnable  <= 0;
+                  //pcWriteAdd      <= 0;
                   address         <= ExceptionHandlerAddress;
                   busValid        <= 1;
                   busInstr        <= 1;
@@ -636,8 +637,8 @@ begin
 
               // Fetch Next
               busWriteEnable  <= 0;
-              pcWriteEnable   <= 0;
-              pcWriteAdd      <= 0;
+              //pcWriteEnable   <= 0;
+              //pcWriteAdd      <= 0;
               address         <= pcDataOut;
               pcCountEnable   <= 1;
               busValid        <= 1;

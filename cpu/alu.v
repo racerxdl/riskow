@@ -24,8 +24,6 @@ parameter NotEqual = 4'hE;
 
 reg [31:0] result;
 
-integer i;
-
 always @(*)
 begin
   case (operation)
@@ -36,15 +34,15 @@ begin
     AND:                        result = X &  Y;
     LesserThanUnsigned:         result = X <  Y;
     LesserThanSigned:           result = $signed(X) < $signed(Y);
-    ShiftRightUnsigned:         result = X >> (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X >> i;            // OMG THATS HORRIBLE
-    ShiftRightSigned:           result = $signed(X) >>> (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) >>> i;  // OMG THATS HORRIBLE
-    ShiftLeftUnsigned:          result = X << (Y % 32);                    //for (i=0; i < 32; i++) if (i == Y[4:0]) result = X << i;            // OMG THATS HORRIBLE
-    ShiftLeftSigned:            result = $signed(X) <<< (Y % 32);          //for (i=0; i < 32; i++) if (i == Y[4:0]) result = $signed(X) <<< i;  // OMG THATS HORRIBLE
+    ShiftRightUnsigned:         result = X >> (Y[4:0]);
+    ShiftRightSigned:           result = $signed(X) >>> (Y[4:0]);
+    ShiftLeftUnsigned:          result = X << (Y[4:0]);
+    ShiftLeftSigned:            result = $signed(X) <<< (Y[4:0]);
     GreaterThanOrEqualUnsigned: result = X >= Y;
     GreaterThanOrEqualSigned:   result = $signed(X) >= $signed(Y);
     Equal:                      result = X == Y;
     NotEqual:                   result = X != Y;
-    default:                    result = 0;
+    // default:                    result = 0;
   endcase
 end
 

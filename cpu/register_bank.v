@@ -19,10 +19,7 @@ module RegisterBank (
 reg [31:0] registers [0:15];
 
 initial begin
-  for ( i = 0; i < 16; i=i+1)
-  begin
-    registers[i] = 0;
-  end
+  for ( i = 0; i < 16; i=i+1)  registers[i] = 0;
 end
 
 integer i;
@@ -31,7 +28,7 @@ always @(posedge clk)
 begin
   if (!reset)
   begin
-   if (writeEnable && wRegNum != 0) registers[wRegNum] <= wDataIn;
+   if (writeEnable) registers[wRegNum] <= wRegNum > 0 ? wDataIn : 0;
   end
 end
 

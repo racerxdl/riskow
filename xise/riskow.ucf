@@ -1,23 +1,15 @@
-# AVNET board LX9 microboard
+##
+NET clk    LOC = H28 | TNM_NET = sys_clk_pin | IOSTANDARD = "LVCMOS25";
+#TIMESPEC TS_sys_clk_pin = PERIOD sys_clk_pin 50000 kHz;
+##
 
-NET clk            LOC = C10 | PERIOD = 100MHz HIGH 50%;
-#NET XCLK            LOC = K15 | PERIOD = 66MHz HIGH 50%;
-#NET XCLK            LOC = V10 | PERIOD = 40MHz HIGH 50%;
 
-NET rst            LOC = V4  | PULLDOWN;
 
-#NET UART_RXD        LOC = R7;
-#NET UART_TXD        LOC = T7;
 
-#NET LED[3]          LOC = P4;
-#NET LED[2]          LOC = L6;
-#NET LED[1]          LOC = F5;
-NET led          LOC = C2;
-
-NET lcd[5]        LOC = P4; # J4-1
-NET lcd[4]        LOC = L16; # J4-1
-
-NET lcd[3]        LOC = H12; # J4-1
-NET lcd[2]        LOC = G13; # J4-2
-NET lcd[1]        LOC = E16; # J4-3
-NET lcd[0]        LOC = E18; # J4-4
+########LED Pin define#####################
+NET led LOC = AN18 | IOSTANDARD = "LVCMOS25";                                           ## LED3
+NET lcd<1>                                  LOC = AN17 | IOSTANDARD = "LVCMOS25";       ## LED4
+NET lcd<2>                                  LOC = AP17 | IOSTANDARD = "LVCMOS25";       ## LED5
+NET lcd<3>                                  LOC = AP16 | IOSTANDARD = "LVCMOS25";       ## LED6
+NET lcd<4>                                  LOC = AN15 | IOSTANDARD = "LVCMOS25";       ## LED7
+NET lcd<5>                                  LOC = AP15 | IOSTANDARD = "LVCMOS25";       ## LED8

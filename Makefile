@@ -35,7 +35,7 @@ PACKAGE=CABGA381
 # CABGA256 on V7.0
 # PACKAGE=CABGA256
 # Maybe --timing-allow-fail
-NEXTPNR_FLAGS=--25k --freq 25 --speed 6 --write top-post-route.json --lpf-allow-unconstrained
+NEXTPNR_FLAGS=--ignore-loops --25k --freq 25 --speed 6 --write top-post-route.json --lpf-allow-unconstrained
 OPENOCD_JTAG_CONFIG=openocd/ft232.cfg
 OPENOCD_DEVICE_CONFIG=openocd/LFE5UM5G-25F.cfg
 
