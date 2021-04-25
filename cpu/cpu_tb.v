@@ -21,13 +21,37 @@ module CPUTest;
 
   reg   [31:0]  memory [0:memorySize-1];
 
+  reg   [31:0]  csrDataIn;
+  wire  [63:0]  instructionsExecuted;
+  wire  [31:0]  csrDataOut;
+  wire  [11:0]  csrNumber;
+  wire          csrWriteEnable;
+
   // Our device under test
   CPU #(
     .EXCEPTION_HANDLING(0)
-  ) cpu(clk, reset, dataIn, dataOut, address, busValid, busInstr, busReady, busWriteEnable);
+  ) cpu(
+    clk,
+    reset,
+    dataIn,
+    dataOut,
+    address,
+    busValid,
+    busInstr,
+    busReady,
+    busWriteEnable,
+    csrDataIn,
+    csrDataOut,
+    csrNumber,
+    csrWriteEnable,
+    instructionsExecuted
+  );
+
+  reg [63:0] cycleCount = 0;
 
   always @(posedge clk)
   begin
+    cycleCount <= cycleCount + 1;
     if (!busValid)
     begin
       busReady <= 0;
@@ -53,6 +77,18 @@ module CPUTest;
         $finish;
       end
     end
+    case (csrNumber)
+      12'hB00: // Machine Cycle counter L
+        csrDataIn <= cycleCount[31:0];
+      12'hB02: // Machine Instruction Counter L
+        csrDataIn <= instructionsExecuted[31:0];
+      12'hB80: // Machine Cycle counter H
+        csrDataIn <= cycleCount[63:32];
+      12'hB82: // Machine Instruction Counter H
+        csrDataIn <= instructionsExecuted[63:32];
+      default:
+        csrDataIn <= 0;
+    endcase
   end
 
   initial begin

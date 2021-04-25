@@ -9,7 +9,16 @@ module CPU (
   output  wire          busValid,          // 1 => Start bus transaction, 0 => Don't use bus
   output  wire          busInstr,          // 1 => Instruction, 0 => Data
   input   wire          busReady,          // 1 => Bus is ready with data, 0 => If bus is busy
-  output                busWriteEnable     // 1 => WRITE, 0 => READ
+  output                busWriteEnable,    // 1 => WRITE, 0 => READ
+
+  // CSR
+  input        [31:0]   csrDataIn,
+  output       [31:0]   csrDataOut,
+  output       [11:0]   csrNumber,
+  output                csrWriteEnable,
+
+  // Core CSRs
+  output  wire [63:0]   instructionsExecuted
 );
 
 parameter EXCEPTION_HANDLING = 1;
@@ -20,6 +29,7 @@ wire  [31:0]   pcDataIn;
 wire           pcWriteEnable;
 wire           pcWriteAdd;
 wire           pcCountEnable;
+
 ProgramCounter PC(clk, reset, pcDataIn, pcDataOut, pcWriteEnable, pcWriteAdd, pcCountEnable);
 
 // Register Bank
@@ -99,7 +109,16 @@ InstructionDecoder # (
   .aluO(aluO),
   .aluOp(aluOp),
   .aluX(aluX),
-  .aluY(aluY)
+  .aluY(aluY),
+
+  // CSR
+  .csrDataIn(csrDataIn),
+  .csrDataOut(csrDataOut),
+  .csrNumber(csrNumber),
+  .csrWriteEnable(csrWriteEnable),
+
+  // Core CSRs
+  .instructionsExecuted(instructionsExecuted)
 );
 
 endmodule

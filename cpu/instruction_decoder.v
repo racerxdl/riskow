@@ -33,7 +33,16 @@ module InstructionDecoder (
   input   wire  [31:0]   aluO,
   output  reg   [3:0]    aluOp,
   output  reg   [31:0]   aluX,
-  output  reg   [31:0]   aluY
+  output  reg   [31:0]   aluY,
+
+  // CSR
+  input   wire [31:0]   csrDataIn,
+  output  reg  [31:0]   csrDataOut,
+  output  reg  [11:0]   csrNumber,
+  output  reg           csrWriteEnable,
+
+  // Core CSRs
+  output  reg  [63:0]   instructionsExecuted
 );
 
 parameter EXCEPTION_HANDLING = 0;
@@ -78,6 +87,9 @@ wire  [11:0] immTypeS         = {dataIn[31:25], dataIn[11:7]};
 wire  [12:0] immTypeB         = {dataIn[31], dataIn[7], dataIn[30:25], dataIn[11:8], 1'b0};
 wire  [19:0] immTypeU         = dataIn[31:12];
 wire  [19:0] immTypeJ         = {dataIn[31], dataIn[19:12], dataIn[20], dataIn[30:21], 1'b0};
+wire  [11:0] csrIns           = dataIn[31:20];
+wire  [4:0]  immCsr           = dataIn[19:15];
+wire  [31:0] csrOpField       = funct3[2] == 1 ? {27'b0, immCsr} : regOutA;
 
 // Alias for using on load/store
 wire  [1:0]  inputByteOffset  = aluO[1:0];
@@ -97,33 +109,37 @@ reg   [31:0]  tmpInstruction; // Only used in simulation
 
 initial begin
   // For simulation
-  rs1             = 0;
-  rs2             = 0;
-  rd              = 0;
-  imm             = 0;
-  funct3          = 0;
-  funct7          = 0;
-  tmpInstruction  = 0;
-  dataOut         = 0;
-  address         = 0;
-  busWriteEnable  = 0;
-  busValid        = 0;
-  busInstr        = 0;
-  aluX            = 0;
-  aluY            = 0;
-  aluOp           = 0;
-  pcCountEnable   = 0;
-  pcWriteEnable   = 0;
-  pcDataIn        = 0;
-  pcWriteAdd      = 0;
-  regNumA         = 0;
-  regNumB         = 0;
-  wRegDataIn      = 0;
-  wRegRegNum      = 0;
-  wRegWriteEnable = 0;
+  rs1                   = 0;
+  rs2                   = 0;
+  rd                    = 0;
+  imm                   = 0;
+  funct3                = 0;
+  funct7                = 0;
+  tmpInstruction        = 0;
+  dataOut               = 0;
+  address               = 0;
+  busWriteEnable        = 0;
+  busValid              = 0;
+  busInstr              = 0;
+  aluX                  = 0;
+  aluY                  = 0;
+  aluOp                 = 0;
+  pcCountEnable         = 0;
+  pcWriteEnable         = 0;
+  pcDataIn              = 0;
+  pcWriteAdd            = 0;
+  regNumA               = 0;
+  regNumB               = 0;
+  wRegDataIn            = 0;
+  wRegRegNum            = 0;
+  wRegWriteEnable       = 0;
+  instructionsExecuted  = 0;
+  csrWriteEnable        = 0;
+  csrNumber             = 0;
+  instructionsExecuted  = 0;
 
-  opcode          = 7'b0110011; // ALU Op (add)
-  currentState    = Execute1;
+  opcode                = 7'b0110011; // ALU Op (add)
+  currentState          = Execute1;
 end
 
 always @(posedge clk)
@@ -162,15 +178,18 @@ begin
     regNumA         <= 0;
     regNumB         <= 0;
 
-    //wRegDataIn      <= 0;
     wRegRegNum      <= 0;
     wRegWriteEnable <= 0;
 
     // Initial Instruction for Prefetch
     // Can be anything thats NO-OP due init regNumA = x0, regNumB = x0, wRegRegNum = x0
-	 // then it will do add x0, x0, x0
+	  // then it will do add x0, x0, x0
     opcode          <= 7'b0110011; // ALU Op (add)
     currentState    <= Execute1;
+
+    // CSR
+    instructionsExecuted <= 0;
+    csrWriteEnable       <= 0;
   end
   else
   begin
@@ -180,11 +199,13 @@ begin
       pcWriteEnable   <= 0;
       pcWriteAdd      <= 0;
       wRegWriteEnable <= 0;
+      csrWriteEnable  <= 0;
       if (busReady) // Wait bus
       begin
-        busValid      <= 0;
-        busInstr      <= 0;
-        currentState  <= Decode;
+        busValid              <= 0;
+        busInstr              <= 0;
+        currentState          <= Decode;
+        instructionsExecuted  <= instructionsExecuted + 1;
       end
     end
     else if (currentState == Decode)  //  2. READ Bus Data -> Instruction Holder, Set PC Count = 0
@@ -225,6 +246,10 @@ begin
       begin
           imm <= { {12{immTypeJ[19]}}, immTypeJ[19:0] };
       end
+      else if (inputOpcode == 7'b1110011)                               // CSR
+      begin
+          csrNumber <= csrIns;
+      end
       currentState  <= Execute0;
     end
     else // Execute State
@@ -255,9 +280,6 @@ begin
               currentState      <= Fetch0;
 
               // Fetch Next
-              //busWriteEnable  <= 0;
-              //pcWriteEnable   <= 0;
-              //pcWriteAdd      <= 0;
               address         <= pcDataOut;
               pcCountEnable   <= 1;
               busValid        <= 1;
@@ -291,9 +313,6 @@ begin
               currentState      <= Fetch0;
 
               // Fetch Next
-              //busWriteEnable  <= 0;
-              //pcWriteEnable   <= 0;
-              //pcWriteAdd      <= 0;
               address         <= pcDataOut;
               pcCountEnable   <= 1;
               busValid        <= 1;
@@ -637,14 +656,45 @@ begin
 
               // Fetch Next
               busWriteEnable  <= 0;
-              //pcWriteEnable   <= 0;
-              //pcWriteAdd      <= 0;
               address         <= pcDataOut;
               pcCountEnable   <= 1;
               busValid        <= 1;
               busInstr        <= 1;
             end
           endcase
+        end
+        else if (inputOpcode == 7'b1110011)
+        begin
+          if (funct3 == 3'b000) // ecall / ebreak. no-op here
+          begin
+            currentState    <= Fetch0;
+            address         <= pcDataOut;
+            pcCountEnable   <= 1;
+            busValid        <= 1;
+            busInstr        <= 1;
+          end
+          else
+          begin
+            wRegWriteEnable <= 1;
+            wRegDataIn      <= csrDataIn;
+            csrWriteEnable  <= 1;
+
+            case (funct3[1:0]) // Immediate vs register already defined at csrOpField
+              2'b01: // csr rw   // t = CSRs[csr]; CSRs[csr] = csrOpField; x[rd] = t
+                csrDataOut      <= csrOpField;
+              2'b10: // csr rs   // t = CSRs[csr]; CSRs[csr] = t | csrOpField; x[rd] = t
+                csrDataOut      <= csrDataIn | csrOpField;
+              2'b11: // csr rc   // t = CSRs[csr]; CSRs[csr] = t &∼ csrOpField; x[rd] = t
+                csrDataOut      <= csrDataIn & ~(csrOpField);
+            endcase
+
+            // Single cycle :D
+            currentState    <= Fetch0;
+            address         <= pcDataOut;
+            pcCountEnable   <= 1;
+            busValid        <= 1;
+            busInstr        <= 1;
+          end
         end
     end
   end

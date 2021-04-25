@@ -122,3 +122,14 @@ ALU:
     5. Read regOut store in ALU Y, Set regNum = rd
     6. Read ALU O store in regIn, Set regWriteEnable = 1
     7. Set regWriteEnable = 0
+
+CSR / ECall / EBreak
+
+000000000000 00000 000 00000 1110011 I ecall  // Do nothing
+000000000001 00000 000 00000 1110011 I ebreak // Do nothing
+         csr   rs1 001    rd 1110011 I csrrw  // t = CSRs[csr]; CSRs[csr] = x[rs1]; x[rd] = t
+         csr   rs1 010    rd 1110011 I csrrs  // t = CSRs[csr]; CSRs[csr] = t | x[rs1]; x[rd] = t
+         csr   rs1 011    rd 1110011 I csrrc  // t = CSRs[csr]; CSRs[csr] = t &∼ x[rs1]; x[rd] = t
+         csr  zimm 101    rd 1110011 I csrrwi // x[rd] = CSRs[csr];CSRs[csr] = zimm
+         csr  zimm 110    rd 1110011 I csrrsi // t = CSRs[csr]; CSRs[csr] = t |zimm; x[rd] = t
+         csr  zimm 111    rd 1110011 I csrrci // t = CSRs[csr]; CSRs[csr] = t &∼zimm; x[rd] = t
