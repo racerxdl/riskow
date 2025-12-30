@@ -86,7 +86,7 @@ wire  [11:0] immTypeI         = dataIn[31:20];
 wire  [11:0] immTypeS         = {dataIn[31:25], dataIn[11:7]};
 wire  [12:0] immTypeB         = {dataIn[31], dataIn[7], dataIn[30:25], dataIn[11:8], 1'b0};
 wire  [19:0] immTypeU         = dataIn[31:12];
-wire  [19:0] immTypeJ         = {dataIn[31], dataIn[19:12], dataIn[20], dataIn[30:21], 1'b0};
+wire  [20:0] immTypeJ         = {dataIn[31], dataIn[19:12], dataIn[20], dataIn[30:21], 1'b0};
 wire  [11:0] csrIns           = dataIn[31:20];
 wire  [4:0]  immCsr           = dataIn[19:15];
 wire  [31:0] csrOpField       = funct3[2] == 1 ? {27'b0, immCsr} : regOutA;
@@ -244,7 +244,7 @@ begin
       end
       else if (inputOpcode == 7'b1101111)                               // Type J instructions
       begin
-          imm <= { {12{immTypeJ[19]}}, immTypeJ[19:0] };
+          imm <= { {11{immTypeJ[20]}}, immTypeJ[20:0] };
       end
       else if (inputOpcode == 7'b1110011)                               // CSR
       begin
