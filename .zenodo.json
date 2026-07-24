@@ -1,0 +1,20 @@
+{
+  "title": "Riskow: a RISC-V processor implemented in Verilog",
+  "description": "Riskow is a RISC-V processor implemented in Verilog. The repository contains the CPU core, peripheral modules, simulation testbenches, ECP5 FPGA constraints, build scripts, and supporting firmware/tooling.",
+  "creators": [
+    {
+      "name": "Teske, Lucas"
+    }
+  ],
+  "access_right": "open",
+  "license": "Apache-2.0",
+  "upload_type": "software",
+  "language": "eng",
+  "keywords": [
+    "RISC-V",
+    "Verilog",
+    "processor design",
+    "FPGA",
+    "ECP5"
+  ]
+}
